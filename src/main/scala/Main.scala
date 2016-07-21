@@ -3,10 +3,12 @@ package smick
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
+import com.twitter.finagle.Http
+import com.twitter.finagle.http.HttpMuxer
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.server.{ Closer, TwitterServer }
 import com.twitter.util.{ Await, Duration, Future }
-import java.net.URL
+import java.net.{ InetSocketAddress, URL }
 
 trait SmickHome extends TwitterServer with Closer {
   implicit val timer = DefaultTimer.twitter
@@ -37,14 +39,19 @@ object Main extends SmickHome
   with InfluxDB
   with Nest
   with ObserverIP
-  with WattVision
+  with Rainforest
 {
+  val httpAddr = flag("http.addr", new InetSocketAddress(8888), "Server bind addr")
+
   def main(): Unit = {
     val store = new InfluxStore
+
+    val http = Http.serve(httpAddr(), (new HttpMuxer())
+      .withHandler("/rainforest", rainforestMuxer(store)))
+
     val nest = nestLoop(store)
     val observer = observerLoop(store)
-    val wattVision = wattVisionLoop(store)
 
-    Await.all(nest, observer, wattVision)
+    Await.all(http, nest, observer)
   }
 }
