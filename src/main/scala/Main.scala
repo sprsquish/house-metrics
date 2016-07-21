@@ -6,11 +6,11 @@ import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import com.twitter.finagle.Http
 import com.twitter.finagle.http.HttpMuxer
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.server.{ Closer, TwitterServer }
+import com.twitter.server.TwitterServer
 import com.twitter.util.{ Await, Duration, Future }
 import java.net.{ InetSocketAddress, URL }
 
-trait SmickHome extends TwitterServer with Closer {
+trait SmickHome extends TwitterServer {
   implicit val timer = DefaultTimer.twitter
 
   val json = new ObjectMapper with ScalaObjectMapper
@@ -40,6 +40,7 @@ object Main extends SmickHome
   with Nest
   with ObserverIP
   with Rainforest
+  with Rachio
 {
   val httpAddr = flag("http.addr", new InetSocketAddress(8888), "Server bind addr")
 
@@ -47,7 +48,8 @@ object Main extends SmickHome
     val store = new InfluxStore
 
     val http = Http.serve(httpAddr(), (new HttpMuxer())
-      .withHandler("/rainforest", rainforestMuxer(store)))
+      .withHandler("/rainforest", rainforestMuxer(store))
+      .withHandler("/rachio/webhook", rachioMuxer(store)))
 
     val nest = nestLoop(store)
     val observer = observerLoop(store)

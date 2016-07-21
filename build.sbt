@@ -8,6 +8,8 @@ version := "1.0"
 
 scalaVersion := "2.11.8"
 
+scalacOptions ++= Seq("-unchecked", "-deprecation")
+
 resolvers += "twitter-repo" at "https://maven.twttr.com"
 
 libraryDependencies ++= Seq(
