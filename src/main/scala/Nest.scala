@@ -68,16 +68,15 @@ trait Nest { self: SmickHome =>
     ("thermostats", "thermostat", thermoMetrics))
 
   private def write(store: Store, data: Nest.Data): Future[Unit] = {
-    val entries = dataDefs flatMap { case (field, name, metrics) =>
-      data.get(field).toSeq flatMap { objs =>
-        objs flatMap { case (_, info) =>
-          val tags = Map("name" -> info.get("name").get, "type" -> name)
-          metrics flatMap { metric =>
-            info.get(metric) map { v => StoreEntry(metric, translate(v), tags) }
-          }
-        }
-      }
-    }
+    val entries = for {
+      (field, name, metrics) <- dataDefs
+      objs <- data.get(field).toSeq
+      (_, info) <- objs
+      tags = Map("name" -> info.get("name").get, "type" -> name)
+      metric <- metrics
+      v <- info.get(metric)
+    } yield StoreEntry(metric, translate(v), tags)
+
     store.write(entries)
   }
 }
