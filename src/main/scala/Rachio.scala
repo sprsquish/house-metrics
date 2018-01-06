@@ -20,11 +20,11 @@ trait Rachio { self: SmickHome =>
         data = d.asInstanceOf[List[Map[String, Any]]]
         sEntry <- data find { _.get("key") == Some("status") }
         status <- sEntry.get("convertedValue")
-        nEntry<- data find { _.get("key") == Some("zoneName") }
+        nEntry <- data find { _.get("key") == Some("zoneName") }
         name <- nEntry.get("convertedValue")
         tags = Map("name" -> name.asInstanceOf[String])
       } yield store.write(Seq(StoreEntry("sprinklers", convert(status), tags)))
 
-      rep.getOrElse(Future.Done) map { _ => req.response }
+      rep.getOrElse(Future.Done) map { _ => Response(req) }
     }
 }

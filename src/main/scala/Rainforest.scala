@@ -19,6 +19,6 @@ trait Rainforest { self: SmickHome =>
           } catch { case t: Throwable =>
             Future.Done
           }
-      }) map { _ => req.response }
+      }) map { _ => Response(req) }
     }
 }

@@ -1,21 +1,28 @@
-import com.github.retronym.SbtOneJar._
-
-oneJarSettings
-
 name := "home-metrics"
 
 version := "1.0"
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.12.4"
 
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
 resolvers += "twitter-repo" at "https://maven.twttr.com"
 
 libraryDependencies ++= Seq(
-  "com.twitter" %% "twitter-server" % "1.21.0",
-  "com.twitter" %% "finagle-stats" % "6.36.0",
-  "org.scala-lang.modules" %% "scala-java8-compat" % "0.7.0",
-  "org.scala-lang.modules" %% "scala-xml" % "1.0.5"
-  //"org.apache.commons" % "commons-io" % "1.3.2"
+  "ch.qos.logback" % "logback-classic" % "1.2.3",
+  "com.twitter" %% "twitter-server" % "17.12.0",
+  "com.twitter" %% "twitter-server-logback-classic" % "17.12.0",
+  "com.twitter" %% "finagle-stats" % "17.12.0",
+  "org.scala-lang.modules" %% "scala-xml" % "1.0.6"
 )
+
+assemblyJarName in assembly := "smickhome-metrics.jar"
+test in assembly := None
+mainClass in assembly := Some("smick.Main")
+assemblyMergeStrategy in assembly := {
+  case "BUILD"                                        => MergeStrategy.discard
+  case x if x endsWith "io.netty.versions.properties" => MergeStrategy.discard
+  case x =>
+    val oldStrategy = (assemblyMergeStrategy in assembly).value
+    oldStrategy(x)
+}

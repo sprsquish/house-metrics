@@ -20,13 +20,11 @@ case class StoreEntry(
 
 trait InfluxDB { self: SmickHome =>
   val influxDest = flag("influxdb.dest", "hostname:8086", "Dest of influxDB")
-  val influxUser = flag("influxdb.user", "username", "Influx username")
-  val influxPass = flag("influxdb.pass", "password", "Influx password")
   val influxDB = flag("influxdb.db", "database", "Influx Database")
 
   class InfluxStore extends Store {
     private[this] val url = new URL(
-      s"http://${influxUser()}:${influxPass()}@${influxDest()}/write?db=${influxDB()}")
+      s"http://${influxDest()}/write?db=${influxDB()}")
 
     @volatile private[this] var _client: Service[Request, Response] = _
 
