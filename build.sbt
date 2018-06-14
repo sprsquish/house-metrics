@@ -2,25 +2,26 @@ name := "home-metrics"
 
 version := "1.0"
 
-scalaVersion := "2.12.4"
+scalaVersion := "2.12.6"
 
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
 resolvers += "twitter-repo" at "https://maven.twttr.com"
 
-val netty4Version = "4.1.16.Final"
+val netty4Version = "4.1.25.Final"
+val twitterVersion = "18.5.0"
 
 libraryDependencies ++= Seq(
   "io.netty" % "netty-resolver-dns" % netty4Version,
   "io.netty" % "netty-codec-dns" % netty4Version,
 
-  "com.amazonaws" % "aws-java-sdk" % "1.11.258",
+  "com.amazonaws" % "aws-java-sdk" % "1.11.347" excludeAll(ExclusionRule(organization = "io.netty")),
 
-  "com.twitter" %% "twitter-server" % "17.12.0",
-  "com.twitter" %% "twitter-server-slf4j-jdk14" % "17.12.0",
+  "com.twitter" %% "twitter-server" % twitterVersion excludeAll(ExclusionRule(organization = "io.netty")),
+  "com.twitter" %% "twitter-server-slf4j-jdk14" % twitterVersion excludeAll(ExclusionRule(organization = "io.netty")),
 
-  "com.twitter" %% "util-logging" % "17.12.0",
-  "com.twitter" %% "finagle-stats" % "17.12.0",
+  "com.twitter" %% "util-logging" % twitterVersion excludeAll(ExclusionRule(organization = "io.netty")),
+  "com.twitter" %% "finagle-stats" % twitterVersion excludeAll(ExclusionRule(organization = "io.netty")),
   "org.scala-lang.modules" %% "scala-xml" % "1.0.6"
 )
 
