@@ -12,7 +12,7 @@ trait Rachio { self: SmickHome =>
       case _ => println(s"Rachio other status: $status"); -1
     }
 
-  def rachioMuxer(store: Store): Service[Request, Response] =
+  def rachioMuxer(store: Store): HttpSvc =
     Service.mk[Request, Response] { req =>
       val rec = json.readValue[Map[String, Any]](req.contentString)
       val rep = for {

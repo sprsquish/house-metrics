@@ -6,7 +6,7 @@ import com.twitter.util.Future
 import scala.xml.XML
 
 trait Rainforest { self: SmickHome =>
-  def rainforestMuxer(store: Store): Service[Request, Response] =
+  def rainforestMuxer(store: Store): HttpSvc =
     Service.mk[Request, Response] { req =>
       val doc = XML.loadString(req.contentString)
       ((doc \ "InstantaneousDemand" \ "Demand").headOption match {

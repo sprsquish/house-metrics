@@ -1,8 +1,8 @@
 package smick
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.{ Http, Service }
-import com.twitter.finagle.http._
+import com.twitter.finagle.Http
+import com.twitter.finagle.http.RequestBuilder
 import com.twitter.util.Future
 import java.net.URL
 
@@ -19,7 +19,7 @@ trait ObserverIP { self: SmickHome =>
     new URL(s"http://${observerUser()}:${observerPass()}@${observerDest()}/cgi-bin/livedata.cgi")
   }
 
-  private[this] val client = Lazy[Service[Request, Response]] {
+  private[this] val client = Lazy[HttpSvc] {
     Http.newClient(destStr(url())).toService
   }
 

@@ -15,20 +15,9 @@ import com.twitter.util.{ Await, Duration, Future }
 import java.net.{ InetSocketAddress, URL }
 import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
+import java.util.function.{ Function => JFun }
 
-case class Event(kind: String, data: String)
-
-trait Lazy[T] { def apply(): T }
-object Lazy {
-  def apply[T](get: => T) =
-    new Lazy[T] {
-      @volatile var _value: Option[T] = None
-      def apply(): T = _value getOrElse {
-        _value = Some(get)
-        _value.get
-      }
-    }
-}
+object Halt extends Exception
 
 trait SmickHome extends TwitterServer with JDK14Logging {
   implicit val timer = DefaultTimer
@@ -53,7 +42,7 @@ trait SmickHome extends TwitterServer with JDK14Logging {
   }
 
   private[this] val eventStreamClients = new ConcurrentHashMap[URL, Service[Request, Response]]()
-  private[this] val newESClient: java.util.function.Function[URL, Service[Request, Response]] = { url: URL =>
+  private[this] val newESClient: JFun[URL, Service[Request, Response]] = { url: URL =>
     Http.client
       .withTls(url.getHost)
       .withStreaming(true)
@@ -99,8 +88,6 @@ trait SmickHome extends TwitterServer with JDK14Logging {
     }
   }
 }
-
-object Halt extends Exception
 
 object Main extends SmickHome
   with InfluxDB
