@@ -1,6 +1,5 @@
 package smick
 
-import ch.qos.logback.classic.LoggerContext
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
@@ -8,6 +7,7 @@ import com.twitter.finagle.http.HttpMuxer
 import com.twitter.io.Buf
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.server.TwitterServer
+import com.twitter.server.logging.{ Logging => JDK14Logging }
 import com.twitter.finagle.http._
 import com.twitter.finagle.{ Http, Service }
 import com.twitter.concurrent.AsyncStream
@@ -18,10 +18,15 @@ import java.util.concurrent.ConcurrentHashMap
 
 case class Event(kind: String, data: String)
 
-trait SmickHome extends TwitterServer {
-  val logCtx = new LoggerContext
-  val log = logCtx.getLogger("smickhome")
+case class Lazy[T](get: () => T) {
+  @volatile var _value: Option[T] = None
+  def apply(): T = _value getOrElse {
+    _value = Some(get())
+    _value.get
+  }
+}
 
+trait SmickHome extends TwitterServer with JDK14Logging {
   implicit val timer = DefaultTimer
 
   val json = new ObjectMapper with ScalaObjectMapper
@@ -31,7 +36,7 @@ trait SmickHome extends TwitterServer {
   protected def loopIt[T](what: String, delay: Duration, f: => Future[T]): Future[Unit] =
     if (noLoop()) Future.Done else {
       def loop(): Future[Unit] =
-        f onFailure(log.error(what, _)) transform(_ => Future.Done) delayed(delay) before loop()
+        f onFailure(log.error(_, what)) transform(_ => Future.Done) delayed(delay) before loop()
 
       val loopHandle = loop()
       onExit { loopHandle.raise(Halt) }
@@ -59,24 +64,16 @@ trait SmickHome extends TwitterServer {
     eventStreamRequest(url, params) flatMap { r =>
       @volatile var event: Option[Event] = None
       AsyncStream.fromReader(r.reader) foreach { case Buf.Utf8(body) =>
-        println(s"body: $body")
         body.split("\n") foreach {
           case line if line.startsWith("data: ") && event.isDefined =>
-            println(s"data match: $line")
             val evt = event.get.copy(data = line.drop(6))
             event = None
-            println(s"process: $evt")
-            try f.lift(evt) catch {
-              case t: Throwable => println(s"err: $t")
-            }
-
+            f.lift(evt)
 
           case line if line.startsWith("event: ") =>
-            println(s"event match: $line")
             event = Some(Event(line.drop(7), ""))
 
-          case line =>
-            println(s"unmatched: $line")
+          case _ => ()
         }
       }
     }
@@ -103,12 +100,14 @@ object Halt extends Exception
 
 object Main extends SmickHome
   with InfluxDB
-  //with ObserverIP
   //with Nest
+  //with ObserverIP
+  with Particle
   with Rainforest
   with Rachio
-  with Particle
-  with Weewx
+  with Route53
+  //with Weewx
+  with AmbientWeather
 {
   val httpAddr = flag("http.addr", new InetSocketAddress(8888), "Server bind addr")
 
@@ -118,12 +117,17 @@ object Main extends SmickHome
     val server = new HttpMuxer()
       .withHandler("/rainforest", rainforestMuxer(store))
       .withHandler("/rachio/webhook", rachioMuxer(store))
-      .withHandler("/weewx", weewxMuxer(store))
+      //.withHandler("/weewx", weewxMuxer(store))
 
     Await.all(
       //nestLoop(store),
       //observerLoop(store),
+      ambientWeatherLoop(store),
       particleLoop(store),
-      Http.serve(httpAddr(), server))
+      route53Loop(),
+      Http.server
+        .withLabel("main-hooks")
+        .withHttpStats
+        .serve(httpAddr(), server))
   }
 }

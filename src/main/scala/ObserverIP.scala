@@ -27,7 +27,7 @@ trait ObserverIP { self: SmickHome =>
     _client
   }
 
-  private def process(store: Store): Future[Unit] = {
+  private def process(store: Store): Future[Unit] =
     client(RequestBuilder().url(url).buildGet()) flatMap { res =>
       val entries = res.contentString.split("\n") flatMap { line =>
         line.split(" ").toList match {
@@ -62,5 +62,4 @@ trait ObserverIP { self: SmickHome =>
 
       store.write(entries)
     }
-  }
 }
