@@ -26,11 +26,8 @@ trait InfluxDB { self: SmickHome =>
     private[this] val url = new URL(
       s"http://${influxDest()}/write?db=${influxDB()}")
 
-    @volatile private[this] var _client: Service[Request, Response] = _
-
-    private def client = if (_client != null) _client else {
-      _client = Http.newClient(influxDest()).toService
-      _client
+    private[this] val client = Lazy[Service[Request, Response]] {
+      Http.newClient(influxDest()).toService
     }
 
     private def escape(v: Any): String = v match {
@@ -49,7 +46,7 @@ trait InfluxDB { self: SmickHome =>
 
         val req = RequestBuilder().url(url).buildPost(Buf.Utf8(body))
 
-        client(req) flatMap {
+        client()(req) flatMap {
           case rep if rep.statusCode < 200 || rep.statusCode >= 300 =>
             Future.exception(WriteFail(rep.statusCode, rep.contentString))
           case _ =>

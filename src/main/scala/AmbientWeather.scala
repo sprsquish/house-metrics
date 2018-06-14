@@ -15,20 +15,16 @@ trait AmbientWeather { self: SmickHome =>
   def ambientWeatherLoop(store: Store): Future[Unit] =
     loopIt("ambientWeather", ambientWeatherFreq(), process(store))
 
-  @volatile private[this] var _url: URL = _
-  private def url = if (_url != null) _url else {
-    _url = new URL(s"https://api.ambientweather.net/v1/devices/${ambientWeatherMAC()}?apiKey=${ambientWeatherAPI()}&applicationKey=${ambientWeatherApp()}")
-    _url
+  private[this] val url = Lazy[URL] {
+    new URL(s"https://api.ambientweather.net/v1/devices/${ambientWeatherMAC()}?apiKey=${ambientWeatherAPI()}&applicationKey=${ambientWeatherApp()}")
   }
 
-  @volatile private[this] var _client: Service[Request, Response] = _
-  private def client = if (_client != null) _client else {
-    _client = Http.newClient(destStr(url)).toService
-    _client
+  private[this] val client = Lazy[Service[Request, Response]] {
+    Http.newClient(destStr(url())).toService
   }
 
   private def process(store: Store): Future[Unit] =
-    client(RequestBuilder().url(url).buildGet()) flatMap { res =>
+    client()(RequestBuilder().url(url()).buildGet()) flatMap { res =>
       val recs = json.readValue[List[Map[String, Any]]](res.contentString)
       val entries = recs flatMap { data =>
         StoreEntry("indoor_temp", data("tempinf")) ::

@@ -15,20 +15,16 @@ trait ObserverIP { self: SmickHome =>
   def observerLoop(store: Store): Future[Unit] =
     loopIt("observer", observerFreq(), process(store))
 
-  @volatile private[this] var _url: URL = _
-  private def url = if (_url != null) _url else {
-    _url = new URL(s"http://${observerUser()}:${observerPass()}@${observerDest()}/cgi-bin/livedata.cgi")
-    _url
+  private[this] val url = Lazy[URL] {
+    new URL(s"http://${observerUser()}:${observerPass()}@${observerDest()}/cgi-bin/livedata.cgi")
   }
 
-  @volatile private[this] var _client: Service[Request, Response] = _
-  private def client = if (_client != null) _client else {
-    _client = Http.newClient(destStr(url)).toService
-    _client
+  private[this] val client = Lazy[Service[Request, Response]] {
+    Http.newClient(destStr(url())).toService
   }
 
   private def process(store: Store): Future[Unit] =
-    client(RequestBuilder().url(url).buildGet()) flatMap { res =>
+    client()(RequestBuilder().url(url()).buildGet()) flatMap { res =>
       val entries = res.contentString.split("\n") flatMap { line =>
         line.split(" ").toList match {
           case _ :: "thb0" :: temp :: hum :: _ :: press :: _ =>

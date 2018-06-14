@@ -22,20 +22,20 @@ trait Route53 { self: SmickHome =>
   val route53IPCheckURL = flag("route53.ipCheckURL", "http://api.ipify.org/", "Route53 url used to get our public IP.")
   val route53Freq = flag("route53.freq", 1.minute, "Route53 polling frequency.")
 
-  private val ipCheckURL = Lazy[URL](() => new URL(route53IPCheckURL()))
+  private val ipCheckURL = Lazy[URL](new URL(route53IPCheckURL()))
 
-  private val ipClient = Lazy[Service[Request, Response]] { () =>
+  private val ipClient = Lazy[Service[Request, Response]] {
     Http.newClient(destStr(ipCheckURL())).toService
   }
 
-  private val resolver = Lazy[DnsNameResolver] { () =>
+  private val resolver = Lazy[DnsNameResolver] {
     val evtLoop = Stack.Params.empty[WorkerPool].eventLoopGroup
     new DnsNameResolverBuilder(evtLoop.next)
       .channelType(classOf[NioDatagramChannel])
       .build()
   }
 
-  private val awsClient = Lazy[AmazonRoute53Async] { () =>
+  private val awsClient = Lazy[AmazonRoute53Async] {
     AmazonRoute53AsyncClientBuilder.standard
       .withRegion("us-east-1")
       .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(route53Key(), route53Secret())))

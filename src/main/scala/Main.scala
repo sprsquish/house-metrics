@@ -18,12 +18,16 @@ import java.util.concurrent.ConcurrentHashMap
 
 case class Event(kind: String, data: String)
 
-case class Lazy[T](get: () => T) {
-  @volatile var _value: Option[T] = None
-  def apply(): T = _value getOrElse {
-    _value = Some(get())
-    _value.get
-  }
+trait Lazy[T] { def apply(): T }
+object Lazy {
+  def apply[T](get: => T) =
+    new Lazy[T] {
+      @volatile var _value: Option[T] = None
+      def apply(): T = _value getOrElse {
+        _value = Some(get)
+        _value.get
+      }
+    }
 }
 
 trait SmickHome extends TwitterServer with JDK14Logging {
