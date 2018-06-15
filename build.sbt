@@ -12,8 +12,7 @@ val netty4Version = "4.1.25.Final"
 val twitterVersion = "18.5.0"
 
 libraryDependencies ++= Seq(
-  "io.netty" % "netty-resolver-dns" % netty4Version,
-  "io.netty" % "netty-codec-dns" % netty4Version,
+  "io.netty" % "netty-all" % netty4Version,
 
   "com.amazonaws" % "aws-java-sdk" % "1.11.347" excludeAll(ExclusionRule(organization = "io.netty")),
 
