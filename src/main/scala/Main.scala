@@ -52,7 +52,7 @@ trait SmickHome extends TwitterServer with JDK14Logging {
 
   protected def eventStream(
     url: String,
-    params: Tuple2[String, String]*
+    params: (String, String)*
   )(f: PartialFunction[Event, Any]): Future[Unit] =
     eventStreamRequest(url, params) flatMap { r =>
       @volatile var event: Option[Event] = None
@@ -73,7 +73,7 @@ trait SmickHome extends TwitterServer with JDK14Logging {
 
   private def eventStreamRequest(
     urlStr: String,
-    params: Seq[Tuple2[String, String]]
+    params: Seq[(String, String)]
   ): Future[Response] = {
     val url = new URL(urlStr)
 
