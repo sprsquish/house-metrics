@@ -4,7 +4,7 @@ import com.amazonaws.auth._
 import com.amazonaws.handlers.AsyncHandler
 import com.amazonaws.services.route53._
 import com.amazonaws.services.route53.model._
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.finagle.http._
 import com.twitter.finagle.netty4.param.WorkerPool

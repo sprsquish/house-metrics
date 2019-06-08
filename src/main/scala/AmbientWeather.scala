@@ -1,6 +1,6 @@
 package smick
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Http
 import com.twitter.finagle.http.RequestBuilder
 import com.twitter.util.{ Duration, Future }

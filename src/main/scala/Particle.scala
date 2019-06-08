@@ -1,6 +1,6 @@
 package smick
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.util.Future
 
 case class ParticleData(

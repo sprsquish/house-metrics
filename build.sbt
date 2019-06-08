@@ -2,19 +2,19 @@ name := "home-metrics"
 
 version := "1.0"
 
-scalaVersion := "2.12.6"
+scalaVersion := "2.12.8"
 
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
 resolvers += "twitter-repo" at "https://maven.twttr.com"
 
-val netty4Version = "4.1.25.Final"
-val twitterVersion = "18.5.0"
+val netty4Version = "4.1.36.Final"
+val twitterVersion = "19.5.1"
 
 libraryDependencies ++= Seq(
   "io.netty" % "netty-all" % netty4Version,
 
-  "com.amazonaws" % "aws-java-sdk" % "1.11.347" excludeAll(ExclusionRule(organization = "io.netty")),
+  "com.amazonaws" % "aws-java-sdk" % "1.11.568" excludeAll(ExclusionRule(organization = "io.netty")),
 
   "com.twitter" %% "twitter-server" % twitterVersion excludeAll(ExclusionRule(organization = "io.netty")),
   "com.twitter" %% "twitter-server-slf4j-jdk14" % twitterVersion excludeAll(ExclusionRule(organization = "io.netty")),

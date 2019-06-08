@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import com.twitter.finagle.http.HttpMuxer
-import com.twitter.io.Buf
+import com.twitter.io.{ Buf, Reader }
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.server.TwitterServer
 import com.twitter.server.logging.{ Logging => JDK14Logging }
@@ -56,7 +56,7 @@ trait SmickHome extends TwitterServer with JDK14Logging {
   )(f: PartialFunction[Event, Any]): Future[Unit] =
     eventStreamRequest(url, params) flatMap { r =>
       @volatile var event: Option[Event] = None
-      AsyncStream.fromReader(r.reader) foreach { case Buf.Utf8(body) =>
+      Reader.toAsyncStream(r.reader) foreach { case Buf.Utf8(body) =>
         body.split("\n") foreach {
           case line if line.startsWith("data: ") && event.isDefined =>
             val evt = event.get.copy(data = line.drop(6))
