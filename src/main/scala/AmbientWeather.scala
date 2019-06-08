@@ -16,9 +16,7 @@ trait AmbientWeather { self: SmickHome =>
     loopIt("ambientWeather", ambientWeatherFreq(), process(store))
 
   private[this] val url = Lazy[URL] {
-    val u = new URL(s"https://api.ambientweather.net/v1/devices/${ambientWeatherMAC()}?apiKey=${ambientWeatherAPI()}&applicationKey=${ambientWeatherApp()}&limit=1")
-      println(u)
-      u
+    new URL(s"https://api.ambientweather.net/v1/devices/${ambientWeatherMAC()}?apiKey=${ambientWeatherAPI()}&applicationKey=${ambientWeatherApp()}&limit=1")
   }
 
   private[this] val client = Lazy[HttpSvc] {
