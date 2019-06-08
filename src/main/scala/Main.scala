@@ -99,6 +99,7 @@ object Main extends SmickHome
   with Route53
   //with Weewx
   with AmbientWeather
+  with Awair
 {
   val httpAddr = flag("http.addr", new InetSocketAddress(8888), "Server bind addr")
 
@@ -114,6 +115,7 @@ object Main extends SmickHome
       //nestLoop(store),
       //observerLoop(store),
       ambientWeatherLoop(store),
+      awairLoop(store),
       particleLoop(store),
       route53Loop(),
       Http.server
