@@ -1,15 +1,13 @@
-name := "home-metrics"
-
+name := "smickhome-metrics"
 version := "1.0"
-
-scalaVersion := "2.12.8"
+scalaVersion := "2.12.10"
 
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
 resolvers += "twitter-repo" at "https://maven.twttr.com"
 
-val netty4Version = "4.1.36.Final"
-val twitterVersion = "19.5.1"
+val netty4Version = "4.1.41.Final"
+val twitterVersion = "19.9.0"
 
 libraryDependencies ++= Seq(
   "io.netty" % "netty-all" % netty4Version,
@@ -21,7 +19,7 @@ libraryDependencies ++= Seq(
 
   "com.twitter" %% "util-logging" % twitterVersion excludeAll(ExclusionRule(organization = "io.netty")),
   "com.twitter" %% "finagle-stats" % twitterVersion excludeAll(ExclusionRule(organization = "io.netty")),
-  "org.scala-lang.modules" %% "scala-xml" % "1.0.6"
+  "org.scala-lang.modules" %% "scala-xml" % "1.2.0"
 )
 
 assemblyJarName in assembly := "smickhome-metrics.jar"
