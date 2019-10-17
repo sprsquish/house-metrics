@@ -19,7 +19,7 @@ trait Particle { self: SmickHome =>
   private def process(store: Store): Future[Unit] = {
     val evts = Set("temperature", "humidity")
 
-    eventStream(particleStream(), "access_token" -> particleAuth()) {
+    eventStream("particle", particleStream(), "access_token" -> particleAuth()) {
       case Event(evt, jsonStr) if evts contains evt =>
         val ParticleData(value, _, _, coreid)= json.readValue[ParticleData](jsonStr)
         val entry = StoreEntry(s"room_$evt", value, Map("coreid" -> coreid))

@@ -9,7 +9,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.http._
 import com.twitter.finagle.netty4.param.WorkerPool
 import com.twitter.util.{ Future, Promise }
-import io.netty.channel.socket.nio.NioDatagramChannel
+import io.netty.channel.epoll.EpollDatagramChannel
 import io.netty.resolver.dns._
 import io.netty.util.concurrent.{ Future => NFuture, FutureListener }
 import java.net.{ InetAddress, URL }
@@ -25,13 +25,16 @@ trait Route53 { self: SmickHome =>
   private val ipCheckURL = Lazy[URL](new URL(route53IPCheckURL()))
 
   private val ipClient = Lazy[HttpSvc] {
-    Http.newClient(destStr(ipCheckURL())).toService
+    Http.client
+      .withLabel("route53:ipify")
+      .newClient(destStr(ipCheckURL()))
+      .toService
   }
 
   private val resolver = Lazy[DnsNameResolver] {
     val evtLoop = Stack.Params.empty[WorkerPool].eventLoopGroup
     new DnsNameResolverBuilder(evtLoop.next)
-      .channelType(classOf[NioDatagramChannel])
+      .channelType(classOf[EpollDatagramChannel])
       .build()
   }
 

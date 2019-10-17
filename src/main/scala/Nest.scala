@@ -58,7 +58,7 @@ trait Nest { self: SmickHome =>
       "has_leaf")
 
   private def process(store: Store): Future[Unit] =
-    eventStream(nestUrl(), "auth" -> nestAuth()) { case Event("put", data) =>
+    eventStream("nest", nestUrl(), "auth" -> nestAuth()) { case Event("put", data) =>
       val rec = json.readValue[NestResult](data)
       write(store, rec.data) onFailure println
     }

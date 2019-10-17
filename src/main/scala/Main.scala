@@ -41,9 +41,10 @@ trait SmickHome extends TwitterServer with JDK14Logging {
     s"${url.getHost}:${port}"
   }
 
-  private[this] val eventStreamClients = new ConcurrentHashMap[URL, Service[Request, Response]]()
-  private[this] val newESClient: JFun[URL, Service[Request, Response]] = { url: URL =>
+  private[this] val eventStreamClients = new ConcurrentHashMap[(String, URL), Service[Request, Response]]()
+  private[this] val newESClient: JFun[(String, URL), Service[Request, Response]] = { case ((name: String, url: URL)) =>
     Http.client
+      .withLabel(name)
       .withTls(url.getHost)
       .withStreaming(true)
       .newClient(destStr(url))
@@ -51,10 +52,11 @@ trait SmickHome extends TwitterServer with JDK14Logging {
   }
 
   protected def eventStream(
+    name: String,
     url: String,
     params: (String, String)*
   )(f: PartialFunction[Event, Any]): Future[Unit] =
-    eventStreamRequest(url, params) flatMap { r =>
+    eventStreamRequest(name, url, params) flatMap { r =>
       @volatile var event: Option[Event] = None
       Reader.toAsyncStream(r.reader) foreach { case Buf.Utf8(body) =>
         body.split("\n") foreach {
@@ -72,6 +74,7 @@ trait SmickHome extends TwitterServer with JDK14Logging {
     }
 
   private def eventStreamRequest(
+    name: String,
     urlStr: String,
     params: Seq[(String, String)]
   ): Future[Response] = {
@@ -81,10 +84,12 @@ trait SmickHome extends TwitterServer with JDK14Logging {
     req.accept = "text/event-stream"
     req.host = url.getHost
 
-    eventStreamClients.computeIfAbsent(url, newESClient)(req) flatMap {
-      case r if r.statusCode == 307 => eventStreamRequest(r.location.get, params)
+    eventStreamClients.computeIfAbsent((name, url), newESClient)(req) flatMap {
+      case r if r.statusCode == 307 =>
+        Option(eventStreamClients.remove((name, url))) foreach { _.close() }
+        eventStreamRequest(name, r.location.get, params)
       case r if r.statusCode == 200 => Future.value(r)
-      case r => Future.exception(new Exception("Can't handle " + r))
+      case r => Future.exception(new Exception(s"Can't handle $r"))
     }
   }
 }

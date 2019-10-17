@@ -27,7 +27,10 @@ trait InfluxDB { self: SmickHome =>
       s"http://${influxDest()}/write?db=${influxDB()}")
 
     private[this] val client = Lazy[HttpSvc] {
-      Http.newClient(influxDest()).toService
+      Http.client
+        .withLabel("influxdb")
+        .newClient(influxDest())
+        .toService
     }
 
     private def escape(v: Any): String = v match {
