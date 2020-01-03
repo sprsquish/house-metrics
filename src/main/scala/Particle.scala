@@ -17,12 +17,12 @@ trait Particle { self: SmickHome =>
     loopIt("particle", 1.minute, process(store))
 
   private def process(store: Store): Future[Unit] = {
-    val evts = Set("temperature", "humidity")
+    val evts = Set("lum-vis", "lum-full", "lum-ir")
 
     eventStream("particle", particleStream(), "access_token" -> particleAuth()) {
       case Event(evt, jsonStr) if evts contains evt =>
         val ParticleData(value, _, _, coreid)= json.readValue[ParticleData](jsonStr)
-        val entry = StoreEntry(s"room_$evt", value, Map("coreid" -> coreid))
+        val entry = StoreEntry(s"particle.$evt", value, Map("coreid" -> coreid))
         store.write(Seq(entry)) onFailure println
     }
   }

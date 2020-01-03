@@ -48,6 +48,8 @@ trait AmbientWeather { self: SmickHome =>
         StoreEntry("wind_speed", data("windspeedmph"), time = ts) ::
         StoreEntry("solar_radiation", data("solarradiation"), time = ts) ::
         StoreEntry("uv_index", data("uv"), time = ts) ::
+        StoreEntry("rain_rate_hourly", data("hourlyrainin"), time = ts) ::
+        StoreEntry("rain_event_accum", data("eventrainin"), time = ts) ::
         Nil
       }
 
