@@ -41,6 +41,7 @@ trait InfluxDB { self: SmickHome =>
 
     def write(vals: Seq[StoreEntry]): Future[Unit] =
       if (vals.isEmpty) Future.Done else {
+        log.debug(s"Writing: $vals")
         val body = vals map { case StoreEntry(name, value, tagMap, time) =>
           val tags = tagMap map { case (k, v) => s"""$k="${escape(v)}"""" }
           val pre = (Seq(name) ++ tags) mkString(",")
