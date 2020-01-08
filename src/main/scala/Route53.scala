@@ -91,7 +91,7 @@ trait Route53 { self: SmickHome =>
   def route53Loop(): Future[Unit] =
     loopIt("route53", route53Freq(), process())
 
-  def process(): Future[Unit] = {
+  private def process(): Future[Unit] = {
     currentIP flatMap { curIP =>
       Future.join {
         route53Domains().toSeq map { case (domain, zoneID) =>
