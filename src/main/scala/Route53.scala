@@ -25,10 +25,7 @@ trait Route53 { self: SmickHome =>
   private val ipCheckURL = Lazy[URL](new URL(route53IPCheckURL()))
 
   private val ipClient = Lazy[HttpSvc] {
-    Http.client
-      .withLabel("route53:ipify")
-      .newClient(destStr(ipCheckURL()))
-      .toService
+    Http.client.newService(destName(ipCheckURL()), "route53:ipify")
   }
 
   private val resolver = Lazy[DnsNameResolver] {

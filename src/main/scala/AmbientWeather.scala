@@ -22,10 +22,8 @@ trait AmbientWeather { self: SmickHome =>
   private[this] val client = Lazy[HttpSvc] {
     val _url = url()
     Http.client
-      .withLabel("ambient-weather")
       .withTls(_url.getHost)
-      .newClient(destStr(_url))
-      .toService
+      .newService(destName(_url), "ambient-weather")
   }
 
   private def process(store: Store): Future[Unit] =

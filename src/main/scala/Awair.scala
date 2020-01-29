@@ -40,10 +40,8 @@ trait Awair { self: SmickHome =>
     devices() map { case AwairDevice(n, t, i) =>
       val _url = devURL(t, i)
       val c = Http.client
-        .withLabel(s"awair:$n")
         .withTls(_url.getHost)
-        .newClient(destStr(_url))
-        .toService
+        .newService(destName(_url), s"awair:$n")
       val req = RequestBuilder()
         .setHeader(Fields.Authorization, s"Bearer ${awairToken()}")
         .url(_url)

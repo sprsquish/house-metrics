@@ -3,17 +3,19 @@ package smick
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
+import com.twitter.concurrent.AsyncStream
+import com.twitter.conversions.DurationOps._
+import com.twitter.finagle._
 import com.twitter.finagle.http.HttpMuxer
-import com.twitter.io.{ Buf, Reader }
+import com.twitter.finagle.http._
+import com.twitter.finagle.stats.DefaultStatsReceiver
 import com.twitter.finagle.util.DefaultTimer
+import com.twitter.io.{ Buf, Reader }
 import com.twitter.server.TwitterServer
 import com.twitter.server.logging.{ Logging => JDK14Logging }
-import com.twitter.finagle.http._
-import com.twitter.finagle.{ Http, Service }
-import com.twitter.concurrent.AsyncStream
-import com.twitter.util.{ Await, Duration, Future }
-import java.net.{ InetSocketAddress, URL }
+import com.twitter.util.{ Await, Duration, Future, FuturePool }
 import java.net.URL
+import java.net.{ InetSocketAddress, URL }
 import java.util.concurrent.ConcurrentHashMap
 import java.util.function.{ Function => JFun }
 
@@ -36,18 +38,19 @@ trait SmickHome extends TwitterServer with JDK14Logging {
       loopHandle
     }
 
-  protected def destStr(url: URL): String = {
+  private val Resolver = InetResolver(DefaultStatsReceiver, Some(1.hour), FuturePool.unboundedPool)
+  protected def destName(url: URL): Name = {
     val port = if (url.getPort < 0) url.getDefaultPort else url.getPort
-    s"${url.getHost}:${port}"
+    val uri = s"${url.getHost}:${port}"
+    Name.Bound(Resolver.bind(uri), uri)
   }
 
   private[this] val eventStreamClients = new ConcurrentHashMap[(String, URL), Service[Request, Response]]()
   private[this] val newESClient: JFun[(String, URL), Service[Request, Response]] = { case ((name: String, url: URL)) =>
     Http.client
-      .withLabel(name)
       .withTls(url.getHost)
       .withStreaming(true)
-      .newClient(destStr(url))
+      .newClient(destName(url), name)
       .toService
   }
 
