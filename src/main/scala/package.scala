@@ -6,15 +6,17 @@ package object smick {
 
   case class Event(kind: String, data: String)
 
-  trait Lazy[T] { def apply(): T }
+  trait Lazy[T <: AnyRef] { def apply(): T }
   object Lazy {
-    def apply[T](get: => T) =
+    def apply[T <: AnyRef](get: => T) =
+
       new Lazy[T] {
-        @volatile var _value: Option[T] = None
-        def apply(): T = _value getOrElse {
-          _value = Some(get)
-          _value.get
-        }
+        private[this] var _value: T = _
+        def apply(): T =
+          synchronized {
+            if (_value eq null) _value = get
+            _value
+          }
       }
   }
 }
