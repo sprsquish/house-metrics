@@ -7,7 +7,7 @@ scalacOptions ++= Seq("-unchecked", "-deprecation")
 resolvers += "twitter-repo" at "https://maven.twttr.com"
 
 val netty4Version = "4.1.41.Final"
-val twitterVersion = "19.9.0"
+val twitterVersion = "19.12.0"
 
 libraryDependencies ++= Seq(
   "io.netty" % "netty-all" % netty4Version,
