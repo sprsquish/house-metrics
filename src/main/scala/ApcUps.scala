@@ -13,6 +13,8 @@ trait ApcUps { self: SmickHome =>
   val apcupsPort = flag("apcups.port", 3551, "APC UPS port.")
   val apcupsFreq = flag("apcups.freq", 5.seconds, "APC UPS polling frequency.")
 
+  private[this] val NullChar = 0x00.asInstanceOf[Char]
+
   private[this] val Status = {
     val arr = new Array[Byte](8)
     Unpooled.buffer(8)
@@ -38,7 +40,7 @@ trait ApcUps { self: SmickHome =>
 
   private def process(store: Store): Future[Unit] =
     getStatus flatMap { status =>
-      val statLines = status.split(0x00.asInstanceOf[Char]) flatMap { line =>
+      val statLines = status.split(NullChar).toSeq flatMap { line =>
         line.split(':') match {
           case Array(rawLabel, rawValue) =>
             val label = rawLabel.drop(1).takeWhile(_ != ' ')

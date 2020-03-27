@@ -1,11 +1,11 @@
 name := "smickhome-metrics"
 version := "1.0"
-scalaVersion := "2.12.10"
+scalaVersion := "2.13.1"
 
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
-val netty4Version = "4.1.45.Final"
-val twitterVersion = "20.1.0"
+val netty4Version = "4.1.48.Final"
+val twitterVersion = "20.3.0"
 
 libraryDependencies ++= Seq(
   "io.netty" % "netty-all" % netty4Version,

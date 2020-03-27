@@ -25,7 +25,7 @@ trait ObserverIP { self: SmickHome =>
 
   private def process(store: Store): Future[Unit] =
     client()(RequestBuilder().url(url()).buildGet()) flatMap { res =>
-      val entries = res.contentString.split("\n") flatMap { line =>
+      val entries = res.contentString.split("\n").toSeq flatMap { line =>
         line.split(" ").toList match {
           case _ :: "thb0" :: temp :: hum :: _ :: press :: _ =>
             Seq(StoreEntry("indoor_temp", temp),
