@@ -1,24 +1,26 @@
 name := "smickhome-metrics"
 version := "1.0"
-scalaVersion := "2.13.1"
+scalaVersion := "2.13.2"
 
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
-val netty4Version = "4.1.48.Final"
-val twitterVersion = "20.3.0"
+val netty4Version = "4.1.49.Final"
+val twitterVersion = "20.4.1"
+val awsVersion = "1.11.771"
+val scalaXmlVersion = "1.3.0"
 
 libraryDependencies ++= Seq(
   "io.netty" % "netty-all" % netty4Version,
 
-  "com.amazonaws" % "aws-java-sdk-bom" % "1.11.753",
-  "com.amazonaws" % "aws-java-sdk-route53" % "1.11.753" excludeAll(ExclusionRule(organization = "io.netty")),
+  "com.amazonaws" % "aws-java-sdk-bom" % awsVersion,
+  "com.amazonaws" % "aws-java-sdk-route53" % awsVersion excludeAll(ExclusionRule(organization = "io.netty")),
 
   "com.twitter" %% "twitter-server" % twitterVersion excludeAll(ExclusionRule(organization = "io.netty")),
   "com.twitter" %% "twitter-server-slf4j-jdk14" % twitterVersion excludeAll(ExclusionRule(organization = "io.netty")),
 
   "com.twitter" %% "util-logging" % twitterVersion excludeAll(ExclusionRule(organization = "io.netty")),
   "com.twitter" %% "finagle-stats" % twitterVersion excludeAll(ExclusionRule(organization = "io.netty")),
-  "org.scala-lang.modules" %% "scala-xml" % "1.2.0"
+  "org.scala-lang.modules" %% "scala-xml" % scalaXmlVersion
 )
 
 assemblyJarName in assembly := "smickhome-metrics.jar"
