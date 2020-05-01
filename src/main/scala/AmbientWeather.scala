@@ -29,7 +29,8 @@ trait AmbientWeather { self: SmickHome =>
   private def process(store: Store): Future[Unit] =
     client()(RequestBuilder().url(url()).buildGet()) flatMap { res =>
       val recs = json.readValue[List[Map[String, Any]]](res.contentString)
-      val entries = recs flatMap { data =>
+      val entries = recs flatMap { raw =>
+        val data = raw.get("lastData").map(_.asInstanceOf[Map[String, Any]]).getOrElse(raw)
         val ts = {
           val raw = data("dateutc").asInstanceOf[Long]
           val d = Duration.fromMilliseconds(raw)

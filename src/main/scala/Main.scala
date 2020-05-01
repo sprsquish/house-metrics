@@ -108,7 +108,6 @@ object Main extends SmickHome
   //with Weewx
   with AmbientWeather
   with Awair
-  with ApcUps
 {
   val httpAddr = flag("http.addr", new InetSocketAddress(8888), "Server bind addr")
 
@@ -127,7 +126,6 @@ object Main extends SmickHome
       awairLoop(store),
       particleLoop(store),
       route53Loop(),
-      apcUpsLoop(store),
       Http.server
         .withLabel("main-hooks")
         .withHttpStats
