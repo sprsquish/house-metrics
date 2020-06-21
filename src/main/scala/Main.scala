@@ -27,15 +27,18 @@ trait SmickHome extends TwitterServer with JDK14Logging {
   val json = new ObjectMapper with ScalaObjectMapper
   json.registerModule(DefaultScalaModule)
 
-  val noLoop = flag("noLoop", false, "Do not start the updater loops")
+  protected val loops = flag("loops", Set.empty[String], "Loops that should be enabled")
+
   protected def loopIt[T](what: String, delay: Duration, f: => Future[T]): Future[Unit] =
-    if (noLoop()) Future.Done else {
+    if (loops().contains(what)) {
       def loop(): Future[Unit] =
         f onFailure(log.error(_, what)) transform(_ => Future.Done) delayed(delay) before loop()
 
       val loopHandle = loop()
       onExit { loopHandle.raise(Halt) }
       loopHandle
+    } else {
+      Future.Done
     }
 
   private val Resolver = InetResolver(DefaultStatsReceiver, Some(1.hour), FuturePool.unboundedPool)
@@ -98,36 +101,41 @@ trait SmickHome extends TwitterServer with JDK14Logging {
 }
 
 object Main extends SmickHome
-  with InfluxDB
-  //with Nest
-  //with ObserverIP
-  with Particle
-  with Rainforest
-  with Rachio
-  with Route53
-  //with Weewx
   with AmbientWeather
+  with ApcUps
   with Awair
   with Flume
+  with InfluxDB
+  with Nest
+  with ObserverIP
+  with Particle
+  with Rachio
+  with Rainforest
+  with Route53
+  with Weewx
 {
   val httpAddr = flag("http.addr", new InetSocketAddress(8888), "Server bind addr")
 
   def main(): Unit = {
+    println(s"SmickHome Metrics starting on ${httpAddr()}")
+    println(s"  - Loops Enabled: ${loops().mkString(", ")}")
+
     val store = new InfluxStore
 
     val server = new HttpMuxer()
       .withHandler("/rainforest", rainforestMuxer(store))
       .withHandler("/rachio/webhook", rachioMuxer(store))
-      //.withHandler("/weewx", weewxMuxer(store))
+      .withHandler("/weewx", weewxMuxer(store))
 
     Await.all(
-      //nestLoop(store),
-      //observerLoop(store),
       ambientWeatherLoop(store),
+      apcUpsLoop(store),
       awairLoop(store),
+      flumeLoop(store),
+      nestLoop(store),
+      observerLoop(store),
       particleLoop(store),
       route53Loop(),
-      flumeLoop(store),
       Http.server
         .withLabel("main-hooks")
         .withHttpStats
