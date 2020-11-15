@@ -12,3 +12,4 @@ src_managed/
 project/boot/
 project/plugins/project/
 run.sh
+.bsp
