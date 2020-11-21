@@ -20,7 +20,8 @@ trait ObserverIP { self: SmickHome =>
   }
 
   private[this] val client = Lazy[HttpSvc] {
-    Http.newService(destName(url()), "observe-ip")
+    val name = "observe-ip"
+    Http.newService(destName(name, url()), name)
   }
 
   private def process(store: Store): Future[Unit] =

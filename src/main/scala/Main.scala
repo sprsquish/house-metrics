@@ -41,11 +41,11 @@ trait SmickHome extends TwitterServer with JDK14Logging {
       Future.Done
     }
 
-  private val Resolver = InetResolver(DefaultStatsReceiver, Some(1.hour), FuturePool.unboundedPool)
-  protected def destName(url: URL): Name = {
+  protected def destName(name: String, url: URL): Name = {
+    val resolver = InetResolver(DefaultStatsReceiver.scope(name), Some(1.minute), FuturePool.unboundedPool)
     val port = if (url.getPort < 0) url.getDefaultPort else url.getPort
     val uri = s"${url.getHost}:${port}"
-    Name.Bound(Resolver.bind(uri), uri)
+    Name.Bound(resolver.bind(uri), uri)
   }
 
   private[this] val eventStreamClients = new ConcurrentHashMap[(String, URL), Service[Request, Response]]()
@@ -53,7 +53,7 @@ trait SmickHome extends TwitterServer with JDK14Logging {
     Http.client
       .withTls(url.getHost)
       .withStreaming(true)
-      .newClient(destName(url), name)
+      .newClient(destName(name, url), name)
       .toService
   }
 

@@ -45,9 +45,10 @@ trait Flume { self: SmickHome =>
 
   private[this] val authURL= new URL("https://api.flumetech.com/oauth/token")
   private[this] val authClient = Lazy[HttpSvc] {
+    val name ="flume-token"
     Http.client
       .withTls(authURL.getHost)
-      .newService(destName(authURL), "flume-token")
+      .newService(destName(name, authURL), name)
   }
 
   private[this] val queryURL = Lazy[URL] {
@@ -55,10 +56,11 @@ trait Flume { self: SmickHome =>
   }
 
   private[this] val queryClient = Lazy[HttpSvc] {
+    val name = "flume-query"
     val url = queryURL()
     Http.client
       .withTls(url.getHost)
-      .newService(destName(url), "flume-query")
+      .newService(destName(name, url), name)
   }
 
   private[this] val tokenBody = Lazy[Buf] {

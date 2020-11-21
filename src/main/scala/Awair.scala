@@ -37,16 +37,17 @@ trait Awair { self: SmickHome =>
   }
 
   private[this] val clients = Lazy[Seq[(String, URL, HttpSvc, Request)]] {
-    devices() map { case AwairDevice(n, t, i) =>
-      val _url = devURL(t, i)
+    devices() map { d =>
+      val name = s"awair:${d.name}"
+      val _url = devURL(d.typ, d.id)
       val c = Http.client
         .withTls(_url.getHost)
-        .newService(destName(_url), s"awair:$n")
+        .newService(destName(name, _url), name)
       val req = RequestBuilder()
         .setHeader(Fields.Authorization, s"Bearer ${awairToken()}")
         .url(_url)
         .buildGet()
-      (n, _url, c, req)
+      (d.name, _url, c, req)
     }
   }
 
