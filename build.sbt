@@ -23,14 +23,11 @@ libraryDependencies ++= Seq(
   "org.scala-lang.modules" %% "scala-xml" % scalaXmlVersion
 )
 
-assemblyJarName in assembly := "smickhome-metrics.jar"
-test in assembly := None
-mainClass in assembly := Some("smick.Main")
-assemblyMergeStrategy in assembly := {
-  case "BUILD"                                        => MergeStrategy.discard
-  case x if x endsWith "io.netty.versions.properties" => MergeStrategy.discard
-  case x if x contains "org/apache/commons/logging"   => MergeStrategy.last
-  case x =>
-    val oldStrategy = (assemblyMergeStrategy in assembly).value
-    oldStrategy(x)
-}
+enablePlugins(JavaServerAppPackaging, RpmPlugin, SystemdPlugin)
+mainClass in Compile := Some("smick.Main")
+
+packageName := "house-metrics"
+rpmVendor := "smickhome"
+rpmLicense := Some("MIT")
+rpmRequirements := Seq("jre-11-headless")
+serviceAutostart in Rpm := true
