@@ -104,6 +104,7 @@ object Main extends SmickHome
   with AmbientWeather
   with ApcUps
   with Awair
+  with Binance
   with Flume
   with InfluxDB
   with Nest
@@ -131,6 +132,7 @@ object Main extends SmickHome
       ambientWeatherLoop(store),
       apcUpsLoop(store),
       awairLoop(store),
+      binanceLoop(store),
       flumeLoop(store),
       nestLoop(store),
       observerLoop(store),
