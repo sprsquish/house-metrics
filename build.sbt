@@ -1,11 +1,11 @@
 name := "smickhome-metrics"
-version := "1.0"
+version := "1.5"
 scalaVersion := "2.13.4"
 
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
-val netty4Version = "4.1.54.Final"
-val twitterVersion = "20.10.0"
+val netty4Version = "4.1.56.Final"
+val twitterVersion = "21.1.0"
 val awsVersion = "1.11.872"
 val scalaXmlVersion = "1.3.0"
 
