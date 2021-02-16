@@ -44,7 +44,7 @@ trait Flume { self: SmickHome =>
     timezone = TimeZone.getTimeZone("America/Los_Angeles"))
 
   private[this] val authURL= new URL("https://api.flumetech.com/oauth/token")
-  private[this] val authClient = Lazy[HttpSvc] {
+  private[this] def authClient = {
     val name ="flume-token"
     Http.client
       .withTls(authURL.getHost)
@@ -55,7 +55,7 @@ trait Flume { self: SmickHome =>
     new URL(s"https://api.flumetech.com/users/${flumeUserID()}/devices/${flumeDeviceID()}/query")
   }
 
-  private[this] val queryClient = Lazy[HttpSvc] {
+  private[this] def queryClient = {
     val name = "flume-query"
     val url = queryURL()
     Http.client
@@ -85,7 +85,7 @@ trait Flume { self: SmickHome =>
       .setHeader(Fields.ContentType, MediaType.Json)
       .buildPost(tokenBody())
 
-    authClient()(req) map { res =>
+    authClient(req) map { res =>
       val resData = json.readValue[Map[String, Any]](res.contentString)
       val data = resData("data").asInstanceOf[List[Any]].head
       val t = data.asInstanceOf[Map[String, Any]]
@@ -109,7 +109,7 @@ trait Flume { self: SmickHome =>
         .setHeader(Fields.Authorization, s"Bearer $token")
         .buildPost(Buf.Utf8(json.writeValueAsString(body)))
 
-      queryClient()(req) flatMap { res =>
+      queryClient(req) flatMap { res =>
         val raw = json.readValue[Map[String, Any]](res.contentString)
         val entries = for {
           q <- raw("data").asInstanceOf[List[Map[String, Any]]]
