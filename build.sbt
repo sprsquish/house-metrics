@@ -1,13 +1,13 @@
 name := "smickhome-metrics"
-version := "1.5"
-scalaVersion := "2.13.4"
+version := "1.8"
+scalaVersion := "2.13.6"
 
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
-val netty4Version = "4.1.56.Final"
-val twitterVersion = "21.1.0"
-val awsVersion = "1.11.872"
-val scalaXmlVersion = "1.3.0"
+val netty4Version = "4.1.65.Final"
+val twitterVersion = "21.4.0"
+val awsVersion = "1.11.1024"
+val scalaXmlVersion = "2.0.0"
 
 libraryDependencies ++= Seq(
   "io.netty" % "netty-all" % netty4Version,
@@ -24,10 +24,10 @@ libraryDependencies ++= Seq(
 )
 
 enablePlugins(JavaServerAppPackaging, RpmPlugin, SystemdPlugin)
-mainClass in Compile := Some("smick.Main")
+Compile / mainClass := Some("smick.Main")
 
 packageName := "house-metrics"
 rpmVendor := "smickhome"
 rpmLicense := Some("MIT")
 rpmRequirements := Seq("jre-11-headless")
-serviceAutostart in Rpm := true
+Rpm / serviceAutostart := true

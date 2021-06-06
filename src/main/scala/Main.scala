@@ -116,6 +116,7 @@ object Main extends SmickHome
   with Weewx
 {
   val httpAddr = flag("http.addr", new InetSocketAddress(8888), "Server bind addr")
+  val shutdownAfter = flag("shutdownAfter", 4.hours, "Kill the process after this time")
 
   def main(): Unit = {
     println(s"SmickHome Metrics starting on ${httpAddr()}")
@@ -127,6 +128,10 @@ object Main extends SmickHome
       .withHandler("/rainforest", rainforestMuxer(store))
       .withHandler("/rachio/webhook", rachioMuxer(store))
       .withHandler("/weewx", weewxMuxer(store))
+
+    Future.sleep(shutdownAfter()) ensure {
+      System.exit(0)
+    }
 
     Await.all(
       ambientWeatherLoop(store),

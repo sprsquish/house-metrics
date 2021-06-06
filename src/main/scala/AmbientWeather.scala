@@ -38,9 +38,6 @@ trait AmbientWeather { self: SmickHome =>
           Some(d.inNanoseconds)
         }
 
-        StoreEntry("indoor_temp", data("tempinf"), time = ts) ::
-        StoreEntry("indoor_hum", data("humidityin"), time = ts) ::
-        StoreEntry("indoor_press", data("baromabsin"), time = ts) ::
         StoreEntry("outdoor_temp", data("tempf"), time = ts) ::
         StoreEntry("outdoor_hum", data("humidity"), time = ts) ::
         StoreEntry("wind_dir", data("winddir"), time = ts) ::
