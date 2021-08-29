@@ -110,6 +110,7 @@ object Main extends SmickHome
   with Nest
   with ObserverIP
   with Particle
+  with PurpleAir
   with Rachio
   with Rainforest
   with Route53
@@ -142,6 +143,7 @@ object Main extends SmickHome
       nestLoop(store),
       observerLoop(store),
       particleLoop(store),
+      purpleAirLoop(store),
       route53Loop(),
       Http.server
         .withLabel("main-hooks")
