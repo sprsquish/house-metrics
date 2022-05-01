@@ -17,7 +17,7 @@ trait Particle { self: SmickHome =>
     loopIt("particle", 1.minute, process(store))
 
   private def process(store: Store): Future[Unit] = {
-    val evts = Set("lum-vis", "lum-full", "lum-ir")
+    val evts = Set("lum-full-avg")
 
     eventStream("particle", particleStream(), "access_token" -> particleAuth()) {
       case Event(evt, jsonStr) if evts contains evt =>
