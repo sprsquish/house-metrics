@@ -1,8 +1,7 @@
 package smick
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
+import com.fasterxml.jackson.databind.json.JsonMapper
+import com.fasterxml.jackson.module.scala.{ DefaultScalaModule, ClassTagExtensions }
 import com.twitter.concurrent.AsyncStream
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
@@ -24,8 +23,7 @@ object Halt extends Exception
 trait SmickHome extends TwitterServer with JDK14Logging {
   implicit val timer = DefaultTimer
 
-  val json = new ObjectMapper with ScalaObjectMapper
-  json.registerModule(DefaultScalaModule)
+  val json = JsonMapper.builder().addModule(DefaultScalaModule).build() :: ClassTagExtensions
 
   protected val loops = flag("loops", Set.empty[String], "Loops that should be enabled")
 
