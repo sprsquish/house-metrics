@@ -1,5 +1,5 @@
 name := "smickhome-metrics"
-version := "1.10"
+version := "1.12"
 scalaVersion := "2.13.8"
 
 scalacOptions ++= Seq("-unchecked", "-deprecation")
