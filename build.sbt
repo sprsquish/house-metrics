@@ -23,11 +23,10 @@ libraryDependencies ++= Seq(
   "org.scala-lang.modules" %% "scala-xml" % scalaXmlVersion
 )
 
-enablePlugins(JavaServerAppPackaging, RpmPlugin, SystemdPlugin)
+enablePlugins(JavaServerAppPackaging, DockerPlugin)
 Compile / mainClass := Some("smick.Main")
 
-packageName := "house-metrics"
-rpmVendor := "smickhome"
-rpmLicense := Some("MIT")
-rpmRequirements := Seq("jre-11-headless")
-Rpm / serviceAutostart := true
+dockerRepository := Some("registry.squishtech.com")
+dockerBaseImage := "openjdk:11"
+dockerUpdateLatest := true
+dockerExposedPorts ++= Seq(9990, 7777)
