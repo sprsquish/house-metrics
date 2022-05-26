@@ -68,7 +68,7 @@ func (a *AmbientWeather) Init() {
 
 func (a *AmbientWeather) Poll(ctx context.Context, store store.Client) error {
 	var readings []*weatherReading
-	if err := a.client.GetJSON(ctx, &readings, hm.URLOpt(a.url)); err != nil {
+	if err := a.client.GetJSON(ctx, a.logger, &readings, hm.URLOpt(a.url)); err != nil {
 		return err
 	}
 

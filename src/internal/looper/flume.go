@@ -89,7 +89,7 @@ func (f *Flume) Poll(ctx context.Context, store store.Client) error {
 		}
 	}
 
-	if err := f.client.SendJSON(ctx, reqData, &repData, func(req *http.Request) {
+	if err := f.client.SendJSON(ctx, f.logger, reqData, &repData, func(req *http.Request) {
 		req.URL = f.queryURL
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", tkn))
 	}); err != nil {
@@ -117,7 +117,7 @@ func (f *Flume) getToken(ctx context.Context) (tkn string, err error) {
 			Token string `json:"access_token"`
 		}
 	}
-	err = f.client.SendJSON(ctx, f.tokenBody, &tknStruct, hm.URLOpt(authURL))
+	err = f.client.SendJSON(ctx, f.logger, f.tokenBody, &tknStruct, hm.URLOpt(authURL))
 	if err != nil {
 		return
 	}

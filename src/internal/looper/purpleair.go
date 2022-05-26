@@ -66,7 +66,7 @@ func (p *PurpleAir) Init() {
 
 func (p *PurpleAir) Poll(ctx context.Context, store store.Client) error {
 	var reading PurpleAirReading
-	if err := p.client.GetJSON(ctx, &reading, hm.URLOpt(p.url)); err != nil {
+	if err := p.client.GetJSON(ctx, p.logger, &reading, hm.URLOpt(p.url)); err != nil {
 		return err
 	}
 

@@ -70,7 +70,7 @@ func (a *Awair) Poll(ctx context.Context, store store.Client) error {
 
 	for devName, devURL := range a.devURLs {
 		var reading AwairReading
-		if err := a.client.GetJSON(ctx, &reading, func(req *http.Request) {
+		if err := a.client.GetJSON(ctx, a.logger, &reading, func(req *http.Request) {
 			req.URL = devURL
 			req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", a.token))
 		}); err != nil {

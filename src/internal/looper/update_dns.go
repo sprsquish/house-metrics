@@ -98,7 +98,7 @@ func (u *UpdateDNS) Retrieve(ctx context.Context) (aws.Credentials, error) {
 
 func (u *UpdateDNS) currentIP(ctx context.Context) (net.IP, error) {
 	var rep struct{ IP string }
-	if err := u.client.GetJSON(ctx, &rep, hm.URLOpt(ipifyURL)); err != nil {
+	if err := u.client.GetJSON(ctx, u.logger, &rep, hm.URLOpt(ipifyURL)); err != nil {
 		return nil, err
 	}
 	return net.ParseIP(rep.IP), nil

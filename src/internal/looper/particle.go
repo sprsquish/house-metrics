@@ -49,7 +49,7 @@ func (p *Particle) Init() {
 }
 
 func (p *Particle) Poll(ctx context.Context, store store.Client) error {
-	eventChan, err := p.client.Events(ctx, hm.URLOpt(p.streamURL))
+	eventChan, err := p.client.Events(ctx, p.logger, hm.URLOpt(p.streamURL))
 	if err != nil {
 		return err
 	}
@@ -60,6 +60,7 @@ func (p *Particle) Poll(ctx context.Context, store store.Client) error {
 
 		// channel closed
 		if evt == nil {
+			p.logger.Info().Msg("event channel closed")
 			return nil
 		}
 

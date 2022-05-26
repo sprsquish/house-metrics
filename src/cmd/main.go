@@ -25,7 +25,6 @@ var log = zerolog.New(
 			Err: os.Stderr,
 		},
 	}).
-	Level(zerolog.InfoLevel).
 	With().
 	Timestamp().
 	Logger()
@@ -38,10 +37,12 @@ var mainCmd = &cobra.Command{
 var loopRunners []*hm.LoopRunner
 var muxer = http.NewServeMux()
 var httpAddr string
+var debug bool
 
 func init() {
 	flags := mainCmd.Flags()
 	flags.StringVar(&httpAddr, "http.addr", ":7777", "Listen address")
+	flags.BoolVar(&debug, "debug", false, "debug mode")
 
 	storage = store.NewInfluxClient(flags, &log)
 
@@ -72,6 +73,11 @@ func main() {
 }
 
 func run(cmd *cobra.Command, args []string) {
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	if debug {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	}
+
 	stopChan := make(chan os.Signal, 1)
 	signal.Notify(stopChan, syscall.SIGTERM, syscall.SIGINT)
 

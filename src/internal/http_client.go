@@ -5,7 +5,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
+	"github.com/rs/zerolog"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -33,11 +33,12 @@ func URLOpt(u *url.URL) func(req *http.Request) {
 	}
 }
 
-func (c *HttpClient) SendJSON(ctx context.Context, reqData interface{}, repData interface{}, opts func(*http.Request)) error {
+func (c *HttpClient) SendJSON(ctx context.Context, log *zerolog.Logger, reqData interface{}, repData interface{}, opts func(*http.Request)) error {
 	reqBytes, err := json.Marshal(reqData)
 	if err != nil {
 		return err
 	}
+	log.Debug().Str("body", string(reqBytes)).Msg("SendJSON req body")
 
 	reqBody := bytes.NewReader(reqBytes)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "", reqBody)
@@ -54,11 +55,16 @@ func (c *HttpClient) SendJSON(ctx context.Context, reqData interface{}, repData 
 	}
 
 	bodyBytes, _ := ioutil.ReadAll(rep.Body)
+	log.Debug().Str("body", string(bodyBytes)).Msg("SendJSON recv body")
 
-	return json.NewDecoder(bytes.NewReader(bodyBytes)).Decode(repData)
+	if err := json.NewDecoder(bytes.NewReader(bodyBytes)).Decode(repData); err != nil {
+		log.Error().Err(err).Str("body", string(bodyBytes)).Msg("SendJSON decode error")
+		return err
+	}
+	return nil
 }
 
-func (c *HttpClient) GetJSON(ctx context.Context, data interface{}, opts func(*http.Request)) error {
+func (c *HttpClient) GetJSON(ctx context.Context, log *zerolog.Logger, data interface{}, opts func(*http.Request)) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "", nil)
 	if err != nil {
 		return err
@@ -73,14 +79,16 @@ func (c *HttpClient) GetJSON(ctx context.Context, data interface{}, opts func(*h
 	defer rep.Body.Close()
 
 	bodyBytes, _ := ioutil.ReadAll(rep.Body)
+	log.Debug().Str("body", string(bodyBytes)).Msg("GetJSON body")
 
 	if err := json.NewDecoder(bytes.NewReader(bodyBytes)).Decode(data); err != nil {
-		return fmt.Errorf("%w data: %s", err, string(bodyBytes))
+		log.Error().Err(err).Str("body", string(bodyBytes)).Msg("GetJSON decode error")
+		return err
 	}
 	return nil
 }
 
-func (c *HttpClient) Events(ctx context.Context, opts func(*http.Request)) (chan *Event, error) {
+func (c *HttpClient) Events(ctx context.Context, log *zerolog.Logger, opts func(*http.Request)) (chan *Event, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "", nil)
 	if err != nil {
 		return nil, err
@@ -108,7 +116,10 @@ func (c *HttpClient) Events(ctx context.Context, opts func(*http.Request)) (chan
 		var event *Event
 		for {
 			line, err := reader.ReadString('\n')
+			log.Debug().Str("line", line).Msg("Event line")
+
 			if err != nil {
+				log.Error().Err(err).Msg("event stream read error")
 				return
 			}
 
