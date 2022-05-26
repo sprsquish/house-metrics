@@ -116,7 +116,11 @@ func (c *HttpClient) Events(ctx context.Context, log *zerolog.Logger, opts func(
 		var event *Event
 		for {
 			line, err := reader.ReadString('\n')
-			log.Debug().Str("line", line).Msg("Event line")
+			if line == "\n" {
+				continue
+			}
+
+			log.Info().Str("line", line).Msg("Event line")
 
 			if err != nil {
 				log.Error().Err(err).Msg("event stream read error")
