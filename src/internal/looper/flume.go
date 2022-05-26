@@ -72,10 +72,11 @@ func (f *Flume) Poll(ctx context.Context, store store.Client) error {
 	nowTS := time.Now()
 	reqData := map[string]interface{}{
 		"queries": []map[string]string{{
-			"since_datetime": f.sinceTS.Format(timeFormat),
-			"until_datetime": nowTS.Format(timeFormat),
+			"since_datetime": f.sinceTS.In(timeLoc).Format(timeFormat),
+			"until_datetime": nowTS.In(timeLoc).Format(timeFormat),
 			"request_id":     "query",
 			"bucket":         "MIN",
+			"operation":      "SUM",
 			"units":          "GALLONS",
 		}},
 	}
@@ -98,9 +99,12 @@ func (f *Flume) Poll(ctx context.Context, store store.Client) error {
 
 	for _, data := range repData.Data {
 		for _, entry := range data.Query {
-			ts, err := time.Parse(timeFormat, entry.Datetime)
-			if err != nil {
-				f.logger.Error().Err(err).Interface("entry", entry).Msg("could not parse timestamp")
+			ts := time.Now()
+			if entry.Datetime != "" {
+				ts, err = time.Parse(timeFormat, entry.Datetime)
+				if err != nil {
+					f.logger.Error().Err(err).Interface("entry", entry).Msg("could not parse timestamp")
+				}
 			}
 			store.Write(ctx, ts, "flume.usage", entry.Value, tags)
 		}
