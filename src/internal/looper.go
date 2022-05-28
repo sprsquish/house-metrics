@@ -32,9 +32,7 @@ func (r *LoopRunner) Run(ctx context.Context, store store.Client) {
 	r.logger.Info().Dur("freq", r.pollFreq).Msg("starting")
 	ticker := time.NewTicker(r.pollFreq)
 
-	if err := (*r.looper).Poll(ctx, store); err != nil {
-		r.logger.Error().Err(err).Msg("poll error")
-	}
+	r.poll(ctx, store)
 
 	for {
 		select {
@@ -44,9 +42,14 @@ func (r *LoopRunner) Run(ctx context.Context, store store.Client) {
 			return
 
 		case <-ticker.C:
-			if err := (*r.looper).Poll(ctx, store); err != nil {
-				r.logger.Error().Err(err).Msg("poll error")
-			}
+			r.poll(ctx, store)
 		}
+	}
+}
+
+func (r *LoopRunner) poll(ctx context.Context, store store.Client) {
+	err := (*r.looper).Poll(ctx, store)
+	if err != nil && err != ErrFailedRequest {
+		r.logger.Error().Err(err).Msg("poll error")
 	}
 }

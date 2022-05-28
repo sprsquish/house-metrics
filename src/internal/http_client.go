@@ -5,12 +5,15 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"github.com/rs/zerolog"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 )
+
+var ErrFailedRequest = errors.New("failed request")
 
 type HttpClient struct {
 	client *http.Client
@@ -54,6 +57,10 @@ func (c *HttpClient) SendJSON(ctx context.Context, log *zerolog.Logger, reqData 
 		return err
 	}
 
+	if rep.StatusCode < 200 || rep.StatusCode >= 300 {
+		return ErrFailedRequest
+	}
+
 	bodyBytes, _ := ioutil.ReadAll(rep.Body)
 	log.Debug().Str("body", string(bodyBytes)).Msg("SendJSON recv body")
 
@@ -77,6 +84,10 @@ func (c *HttpClient) GetJSON(ctx context.Context, log *zerolog.Logger, data inte
 		return err
 	}
 	defer rep.Body.Close()
+
+	if rep.StatusCode < 200 || rep.StatusCode >= 300 {
+		return ErrFailedRequest
+	}
 
 	bodyBytes, _ := ioutil.ReadAll(rep.Body)
 	log.Debug().Str("body", string(bodyBytes)).Msg("GetJSON body")
