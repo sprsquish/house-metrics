@@ -49,7 +49,12 @@ func (r *LoopRunner) Run(ctx context.Context, store store.Client) {
 
 func (r *LoopRunner) poll(ctx context.Context, store store.Client) {
 	err := (*r.looper).Poll(ctx, store)
-	if err != nil && err != ErrFailedRequest {
-		r.logger.Error().Err(err).Msg("poll error")
+	if err != nil {
+		if err != ErrFailedRequest {
+			r.logger.Error().Err(err).Msg("poll error")
+		} else {
+			r.logger.Info().Msg("failed request.. sleeping")
+			time.Sleep(1 * time.Minute)
+		}
 	}
 }
