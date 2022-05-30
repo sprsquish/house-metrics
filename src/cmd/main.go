@@ -56,7 +56,6 @@ func init() {
 		f.MakeLooper("awair", 5*time.Minute, looper.NewAwair),
 		f.MakeLooper("ambientWeather", 1*time.Minute, looper.NewAmbientWeather),
 		f.MakeLooper("flume", 1*time.Minute, looper.NewFlume),
-		f.MakeLooper("purpleair", 10*time.Second, looper.NewPurpleAir),
 		f.MakeLooper("particle", 1*time.Minute, looper.NewParticle),
 		f.MakeLooper("updatedns", 1*time.Minute, looper.NewUpdateDNS),
 	}
