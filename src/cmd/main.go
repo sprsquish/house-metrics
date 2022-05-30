@@ -61,6 +61,7 @@ func init() {
 		f.MakeLooper("updatedns", 1*time.Minute, looper.NewUpdateDNS),
 	}
 
+	muxer.Handle("/purpleair", f.MakeHandler("purpleair", endpoint.NewPurpleAir))
 	muxer.Handle("/rainforest", f.MakeHandler("rainforest", endpoint.NewRainforest))
 	muxer.Handle("/rachio/webhook", f.MakeHandler("rachio", endpoint.NewRachio))
 }
