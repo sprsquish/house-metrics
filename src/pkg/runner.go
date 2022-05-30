@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/rs/zerolog"
 	"github.com/spf13/pflag"
-	"github.com/sprsquish/housemetrics/internal/store"
+	"github.com/sprsquish/housemetrics/pkg/store"
 	"net/http"
 	"time"
 )

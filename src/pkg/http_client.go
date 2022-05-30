@@ -131,7 +131,7 @@ func (c *HttpClient) Events(ctx context.Context, log *zerolog.Logger, opts func(
 				continue
 			}
 
-			log.Info().Str("line", line).Msg("Event line")
+			log.Debug().Str("line", line).Msg("Event line")
 
 			if err != nil {
 				log.Error().Err(err).Msg("event stream read error")

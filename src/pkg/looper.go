@@ -3,7 +3,7 @@ package housemetrics
 import (
 	"context"
 	"github.com/rs/zerolog"
-	"github.com/sprsquish/housemetrics/internal/store"
+	"github.com/sprsquish/housemetrics/pkg/store"
 	"time"
 )
 
