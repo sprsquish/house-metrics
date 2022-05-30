@@ -19,12 +19,11 @@ import (
 var storage store.Client
 
 var log = zerolog.New(
-	zerolog.ConsoleWriter{
-		Out: hm.LevelWriter{
-			Std: os.Stdout,
-			Err: os.Stderr,
-		},
-	}).
+	hm.LevelWriter{
+		Std: zerolog.ConsoleWriter{Out: os.Stdout},
+		Err: zerolog.ConsoleWriter{Out: os.Stderr},
+	},
+).
 	With().
 	Timestamp().
 	Logger()
