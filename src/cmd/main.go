@@ -2,26 +2,33 @@ package main
 
 import (
 	"context"
-	"github.com/rs/zerolog"
-	"github.com/spf13/cobra"
-	hm "github.com/sprsquish/housemetrics/pkg"
-	"github.com/sprsquish/housemetrics/pkg/endpoint"
-	"github.com/sprsquish/housemetrics/pkg/looper"
-	"github.com/sprsquish/housemetrics/pkg/store"
 	"net/http"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/rs/zerolog"
+	"github.com/spf13/cobra"
+	hm "github.com/sprsquish/housemetrics/pkg"
+	"github.com/sprsquish/housemetrics/pkg/endpoint"
+	"github.com/sprsquish/housemetrics/pkg/looper"
+	"github.com/sprsquish/housemetrics/pkg/store"
 )
 
 var storage store.Client
 
 var log = zerolog.New(
 	hm.LevelWriter{
-		Std: zerolog.ConsoleWriter{Out: os.Stdout},
-		Err: zerolog.ConsoleWriter{Out: os.Stderr},
+		Std: zerolog.ConsoleWriter{
+			TimeFormat: time.RFC3339,
+			Out:        os.Stdout,
+		},
+		Err: zerolog.ConsoleWriter{
+			TimeFormat: time.RFC3339,
+			Out:        os.Stderr,
+		},
 	},
 ).
 	With().
