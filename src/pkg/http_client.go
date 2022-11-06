@@ -6,11 +6,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/rs/zerolog"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/rs/zerolog"
 )
 
 var ErrFailedRequest = errors.New("failed request")
@@ -112,10 +113,16 @@ func (c *HttpClient) Events(ctx context.Context, log *zerolog.Logger, opts func(
 		return nil, err
 	}
 
+	errChan := make(chan error)
 	eventChan := make(chan *Event)
 
 	go func() {
-		<-ctx.Done()
+		select {
+		case <-ctx.Done():
+		case err := <-errChan:
+			log.Error().Err(err).Msg("event stream read error")
+		}
+
 		rep.Body.Close()
 		close(eventChan)
 	}()
@@ -134,8 +141,7 @@ func (c *HttpClient) Events(ctx context.Context, log *zerolog.Logger, opts func(
 			log.Debug().Str("line", line).Msg("Event line")
 
 			if err != nil {
-				log.Error().Err(err).Msg("event stream read error")
-				close(eventChan)
+				errChan <- err
 				return
 			}
 
