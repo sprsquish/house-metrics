@@ -78,7 +78,6 @@ func (u *UpdateDNS) Poll(ctx context.Context, store store.Client) error {
 
 			if err != nil || len(resIPs) != 1 {
 				u.logger.Error().Err(err).Str("domain", d).Msg("resolver error")
-				return
 			}
 
 			if curIP.Equal(resIPs[0]) {
