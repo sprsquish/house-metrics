@@ -3,6 +3,11 @@ package looper
 import (
 	"context"
 	"fmt"
+	"net"
+	"net/url"
+	"strings"
+	"sync"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/route53"
 	r53types "github.com/aws/aws-sdk-go-v2/service/route53/types"
@@ -10,10 +15,6 @@ import (
 	"github.com/spf13/pflag"
 	hm "github.com/sprsquish/housemetrics/pkg"
 	"github.com/sprsquish/housemetrics/pkg/store"
-	"net"
-	"net/url"
-	"strings"
-	"sync"
 )
 
 var ipifyURL, _ = url.Parse("https://api.ipify.org?format=json")
@@ -74,13 +75,17 @@ func (u *UpdateDNS) Poll(ctx context.Context, store store.Client) error {
 		go func(d, z string) {
 			defer wg.Done()
 			resIPs, err := net.DefaultResolver.LookupIP(ctx, "ip4", d)
+
 			if err != nil || len(resIPs) != 1 {
 				u.logger.Error().Err(err).Str("domain", d).Msg("resolver error")
+				return
 			}
+
 			if curIP.Equal(resIPs[0]) {
 				u.logger.Debug().Str("domain", d).Msg("ip is current")
 				return
 			}
+
 			if err := u.updateEntry(ctx, resIPs[0], curIP, d, z); err != nil {
 				u.logger.Error().Err(err).Str("domain", d).Msg("dns update error")
 			}
