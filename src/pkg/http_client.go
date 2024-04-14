@@ -6,7 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -37,7 +37,7 @@ func URLOpt(u *url.URL) func(req *http.Request) {
 	}
 }
 
-func (c *HttpClient) SendJSON(ctx context.Context, log *zerolog.Logger, reqData interface{}, repData interface{}, opts func(*http.Request)) error {
+func (c *HttpClient) SendJSON(ctx context.Context, log *zerolog.Logger, reqData any, repData any, opts func(*http.Request)) error {
 	reqBytes, err := json.Marshal(reqData)
 	if err != nil {
 		return err
@@ -62,7 +62,7 @@ func (c *HttpClient) SendJSON(ctx context.Context, log *zerolog.Logger, reqData 
 		return ErrFailedRequest
 	}
 
-	bodyBytes, _ := ioutil.ReadAll(rep.Body)
+	bodyBytes, _ := io.ReadAll(rep.Body)
 	log.Debug().Str("body", string(bodyBytes)).Msg("SendJSON recv body")
 
 	if err := json.NewDecoder(bytes.NewReader(bodyBytes)).Decode(repData); err != nil {
@@ -72,7 +72,7 @@ func (c *HttpClient) SendJSON(ctx context.Context, log *zerolog.Logger, reqData 
 	return nil
 }
 
-func (c *HttpClient) GetJSON(ctx context.Context, log *zerolog.Logger, data interface{}, opts func(*http.Request)) error {
+func (c *HttpClient) GetJSON(ctx context.Context, log *zerolog.Logger, data any, opts func(*http.Request)) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "", nil)
 	if err != nil {
 		return err
@@ -90,7 +90,7 @@ func (c *HttpClient) GetJSON(ctx context.Context, log *zerolog.Logger, data inte
 		return ErrFailedRequest
 	}
 
-	bodyBytes, _ := ioutil.ReadAll(rep.Body)
+	bodyBytes, _ := io.ReadAll(rep.Body)
 	log.Debug().Str("body", string(bodyBytes)).Msg("GetJSON body")
 
 	if err := json.NewDecoder(bytes.NewReader(bodyBytes)).Decode(data); err != nil {

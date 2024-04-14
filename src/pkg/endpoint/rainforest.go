@@ -3,13 +3,14 @@ package endpoint
 import (
 	"bytes"
 	"encoding/xml"
-	"github.com/rs/zerolog"
-	"github.com/spf13/pflag"
-	"github.com/sprsquish/housemetrics/pkg/store"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/rs/zerolog"
+	"github.com/spf13/pflag"
+	"github.com/sprsquish/housemetrics/pkg/store"
 )
 
 type Rainforest struct {
@@ -25,7 +26,7 @@ func NewRainforest(name string, flags *pflag.FlagSet, logger *zerolog.Logger, st
 }
 
 func (r *Rainforest) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	bodyBytes, _ := ioutil.ReadAll(req.Body)
+	bodyBytes, _ := io.ReadAll(req.Body)
 	defer req.Body.Close()
 
 	var reading struct {

@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"time"
+
 	"github.com/rs/zerolog"
 	"github.com/spf13/pflag"
 	"github.com/sprsquish/housemetrics/pkg/store"
-	"io/ioutil"
-	"net/http"
-	"time"
 )
 
 type PurpleAir struct {
@@ -61,14 +62,14 @@ func (p *PurpleAir) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	bodyBytes, _ := ioutil.ReadAll(req.Body)
+	bodyBytes, _ := io.ReadAll(req.Body)
 	defer req.Body.Close()
 
 	w.WriteHeader(http.StatusOK)
 
 	p.logger.Debug().Bytes("body", bodyBytes).Msg("msg")
 
-	var reading map[string]interface{}
+	var reading map[string]any
 	if err := json.NewDecoder(bytes.NewReader(bodyBytes)).Decode(&reading); err != nil {
 		p.logger.Error().Err(err).Str("body", string(bodyBytes)).Msg("decode error")
 		return

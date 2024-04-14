@@ -2,9 +2,10 @@ package housemetrics
 
 import (
 	"context"
+	"time"
+
 	"github.com/rs/zerolog"
 	"github.com/sprsquish/housemetrics/pkg/store"
-	"time"
 )
 
 type Looper interface {

@@ -2,11 +2,12 @@ package housemetrics
 
 import (
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/rs/zerolog"
 	"github.com/spf13/pflag"
 	"github.com/sprsquish/housemetrics/pkg/store"
-	"net/http"
-	"time"
 )
 
 type HandlerFactory = func(string, *pflag.FlagSet, *zerolog.Logger, store.Client) http.Handler

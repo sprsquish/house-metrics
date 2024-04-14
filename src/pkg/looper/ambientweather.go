@@ -3,12 +3,13 @@ package looper
 import (
 	"context"
 	"fmt"
+	"net/url"
+	"time"
+
 	"github.com/rs/zerolog"
 	"github.com/spf13/pflag"
 	hm "github.com/sprsquish/housemetrics/pkg"
 	"github.com/sprsquish/housemetrics/pkg/store"
-	"net/url"
-	"time"
 )
 
 type AmbientWeather struct {

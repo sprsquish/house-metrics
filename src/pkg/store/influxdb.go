@@ -2,11 +2,12 @@ package store
 
 import (
 	"context"
-	"github.com/influxdata/influxdb-client-go/v2"
+	"time"
+
+	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/influxdata/influxdb-client-go/v2/api"
 	"github.com/rs/zerolog"
 	"github.com/spf13/pflag"
-	"time"
 )
 
 type InfluxClient struct {
@@ -43,8 +44,8 @@ func (i *InfluxClient) Init() {
 	i.client = c.WriteAPIBlocking(i.org, i.bucket)
 }
 
-func (i *InfluxClient) Write(ctx context.Context, ts time.Time, name string, val interface{}, tags map[string]string) {
-	pointVal := map[string]interface{}{"value": val}
+func (i *InfluxClient) Write(ctx context.Context, ts time.Time, name string, val any, tags map[string]string) {
+	pointVal := map[string]any{"value": val}
 	point := influxdb2.NewPoint(name, tags, pointVal, ts)
 
 	i.logger.Debug().

@@ -4,14 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/rs/zerolog"
-	"github.com/spf13/pflag"
-	hm "github.com/sprsquish/housemetrics/pkg"
-	"github.com/sprsquish/housemetrics/pkg/store"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/rs/zerolog"
+	"github.com/spf13/pflag"
+	hm "github.com/sprsquish/housemetrics/pkg"
+	"github.com/sprsquish/housemetrics/pkg/store"
 )
 
 var eventTypes = map[string]struct{}{

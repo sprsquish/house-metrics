@@ -3,13 +3,14 @@ package looper
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"net/url"
+	"time"
+
 	"github.com/rs/zerolog"
 	"github.com/spf13/pflag"
 	hm "github.com/sprsquish/housemetrics/pkg"
 	"github.com/sprsquish/housemetrics/pkg/store"
-	"net/http"
-	"net/url"
-	"time"
 )
 
 var (
@@ -70,7 +71,7 @@ func (f *Flume) Poll(ctx context.Context, store store.Client) error {
 	}
 
 	nowTS := time.Now()
-	reqData := map[string]interface{}{
+	reqData := map[string]any{
 		"queries": []map[string]string{{
 			"since_datetime": f.sinceTS.In(timeLoc).Format(timeFormat),
 			"until_datetime": nowTS.In(timeLoc).Format(timeFormat),
@@ -85,7 +86,7 @@ func (f *Flume) Poll(ctx context.Context, store store.Client) error {
 		Data []struct {
 			Query []struct {
 				Datetime string
-				Value    interface{}
+				Value    any
 			}
 		}
 	}

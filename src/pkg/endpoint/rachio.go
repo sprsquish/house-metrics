@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"time"
+
 	"github.com/rs/zerolog"
 	"github.com/spf13/pflag"
 	"github.com/sprsquish/housemetrics/pkg/store"
-	"io"
-	"io/ioutil"
-	"net/http"
-	"time"
 )
 
 type Rachio struct {
@@ -36,7 +36,7 @@ func (r *Rachio) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	bodyBytes, _ := ioutil.ReadAll(req.Body)
+	bodyBytes, _ := io.ReadAll(req.Body)
 	defer req.Body.Close()
 
 	var event struct {

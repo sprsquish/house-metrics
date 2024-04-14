@@ -3,14 +3,15 @@ package looper
 import (
 	"context"
 	"fmt"
-	"github.com/rs/zerolog"
-	"github.com/spf13/pflag"
-	hm "github.com/sprsquish/housemetrics/pkg"
-	"github.com/sprsquish/housemetrics/pkg/store"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/rs/zerolog"
+	"github.com/spf13/pflag"
+	hm "github.com/sprsquish/housemetrics/pkg"
+	"github.com/sprsquish/housemetrics/pkg/store"
 )
 
 type Awair struct {
@@ -28,7 +29,7 @@ type AwairReading struct {
 		Timestamp string
 		Sensors   []struct {
 			Comp  string
-			Value interface{}
+			Value any
 		}
 	}
 }

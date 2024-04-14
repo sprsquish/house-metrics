@@ -1,8 +1,9 @@
 package housemetrics
 
 import (
-	"github.com/rs/zerolog"
 	"io"
+
+	"github.com/rs/zerolog"
 )
 
 type LevelWriter struct {
