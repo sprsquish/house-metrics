@@ -65,9 +65,9 @@ func init() {
 		f.MakeLooper("flume", 1*time.Minute, looper.NewFlume),
 		f.MakeLooper("particle", 1*time.Minute, looper.NewParticle),
 		f.MakeLooper("updatedns", 1*time.Minute, looper.NewUpdateDNS),
+		f.MakeLooper("purpleair", 1*time.Minute, looper.NewPurpleAir),
 	}
 
-	muxer.Handle("/purpleair", f.MakeHandler("purpleair", endpoint.NewPurpleAir))
 	muxer.Handle("/rainforest", f.MakeHandler("rainforest", endpoint.NewRainforest))
 	muxer.Handle("/rachio/webhook", f.MakeHandler("rachio", endpoint.NewRachio))
 }
