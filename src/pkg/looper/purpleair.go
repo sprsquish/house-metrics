@@ -37,6 +37,7 @@ var metricNames = []string{
 	"pm1_0_atm",
 	"pm2_5_atm",
 	"pm10_0_atm",
+	"pm2.5_aqi",
 	"current_humidity",
 	"current_temp_f",
 	"pressure",
