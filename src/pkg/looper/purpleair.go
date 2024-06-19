@@ -88,7 +88,7 @@ func (p *PurpleAir) Poll(ctx context.Context, store store.Client) error {
 
 	for _, name := range metricNames {
 		if val, ok := reading[name]; ok {
-			store.Write(ctx, ts, name, val, nil)
+			store.Write(ctx, ts, fmt.Sprintf("purpleair.%s", name), val, nil)
 		}
 	}
 

@@ -11,6 +11,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/spf13/pflag"
 	hm "github.com/sprsquish/housemetrics/pkg"
+	housemetrics "github.com/sprsquish/housemetrics/pkg"
 	"github.com/sprsquish/housemetrics/pkg/store"
 )
 
@@ -87,6 +88,9 @@ func (a *Awair) Poll(ctx context.Context, store store.Client) error {
 
 			for _, sensor := range entry.Sensors {
 				store.Write(ctx, ts, fmt.Sprintf("awair.%s", sensor.Comp), sensor.Value, devTags)
+				if pm25, ok := sensor.Value.(float64); ok && sensor.Comp == "pm25" {
+					store.Write(ctx, ts, "awair.pm25_aqi", housemetrics.PM25ToAQI(pm25), devTags)
+				}
 			}
 		}
 	}
