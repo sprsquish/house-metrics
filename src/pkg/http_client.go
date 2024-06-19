@@ -87,6 +87,7 @@ func (c *HttpClient) GetJSON(ctx context.Context, log *zerolog.Logger, data any,
 	defer rep.Body.Close()
 
 	if rep.StatusCode < 200 || rep.StatusCode >= 300 {
+		log.Error().Any("rep", rep).Msg("request error")
 		return ErrFailedRequest
 	}
 
