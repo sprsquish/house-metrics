@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -23,18 +24,22 @@ type AmbientWeather struct {
 	url *url.URL
 }
 
+type device struct {
+	MacAddr  string          `json:"macAddress"`
+	LastData *weatherReading `json:"lastData"`
+}
+
 type weatherReading struct {
-	LastData    *weatherReading `json:"lastData"`
-	DateUTC     int64           `json:"dateutc"`
-	OutdoorTemp float64         `json:"tempf"`
-	OutdoorHum  float64         `json:"humidity"`
-	WindDir     float64         `json:"winddir"`
-	WindGust    float64         `json:"windgustmph"`
-	WindSpeed   float64         `json:"windspeedmph"`
-	Radiation   float64         `json:"solarradiation"`
-	UV          float64         `json:"uv"`
-	RainRate    float64         `json:"hourlyrainin"`
-	RainEvent   float64         `json:"eventrainin"`
+	DateUTC     int64   `json:"dateutc"`
+	OutdoorTemp float64 `json:"tempf"`
+	OutdoorHum  float64 `json:"humidity"`
+	WindDir     float64 `json:"winddir"`
+	WindGust    float64 `json:"windgustmph"`
+	WindSpeed   float64 `json:"windspeedmph"`
+	Radiation   float64 `json:"solarradiation"`
+	UV          float64 `json:"uv"`
+	RainRate    float64 `json:"hourlyrainin"`
+	RainEvent   float64 `json:"eventrainin"`
 }
 
 func NewAmbientWeather(name string, flags *pflag.FlagSet, logger *zerolog.Logger, client *hm.HttpClient) hm.Looper {
@@ -51,7 +56,7 @@ func NewAmbientWeather(name string, flags *pflag.FlagSet, logger *zerolog.Logger
 }
 
 func (a *AmbientWeather) Init() {
-	urlStr := fmt.Sprintf("https://api.ambientweather.net/v1/devices/%s", a.mac)
+	urlStr := fmt.Sprintf("https://rt.ambientweather.net/v1/devices")
 	url, err := url.Parse(urlStr)
 	if err != nil {
 		a.logger.Error().Err(err).Msg("failed to start")
@@ -68,15 +73,17 @@ func (a *AmbientWeather) Init() {
 }
 
 func (a *AmbientWeather) Poll(ctx context.Context, store store.Client) error {
-	var readings []*weatherReading
-	if err := a.client.GetJSON(ctx, a.logger, &readings, hm.URLOpt(a.url)); err != nil {
+	var devices []*device
+	if err := a.client.GetJSON(ctx, a.logger, &devices, hm.URLOpt(a.url)); err != nil {
 		return err
 	}
 
-	for _, r := range readings {
-		if r.LastData != nil {
-			r = r.LastData
+	for _, d := range devices {
+		if !strings.EqualFold(d.MacAddr, a.mac) {
+			continue
 		}
+
+		r := d.LastData
 
 		ts := time.UnixMilli(r.DateUTC)
 		store.Write(ctx, ts, "outdoor_temp", r.OutdoorTemp, nil)
