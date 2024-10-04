@@ -27,7 +27,7 @@ func (f *RunnerFactory) MakeLooper(name string, defaultFreq time.Duration, facto
 	runner := LoopRunner{
 		name:   name,
 		logger: &logger,
-		looper: &looper,
+		looper: looper,
 	}
 
 	f.Flags.DurationVar(&runner.pollFreq, fmt.Sprintf("%s.freq", name), defaultFreq, "Polling frequency")

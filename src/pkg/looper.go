@@ -15,7 +15,7 @@ type Looper interface {
 
 type LoopRunner struct {
 	name   string
-	looper *Looper
+	looper Looper
 	logger *zerolog.Logger
 
 	pollFreq time.Duration
@@ -28,7 +28,7 @@ func (r *LoopRunner) Run(ctx context.Context, store store.Client) {
 		return
 	}
 
-	(*r.looper).Init()
+	r.looper.Init()
 
 	r.logger.Info().Dur("freq", r.pollFreq).Msg("starting")
 	ticker := time.NewTicker(r.pollFreq)
@@ -49,7 +49,7 @@ func (r *LoopRunner) Run(ctx context.Context, store store.Client) {
 }
 
 func (r *LoopRunner) poll(ctx context.Context, store store.Client) {
-	err := (*r.looper).Poll(ctx, store)
+	err := r.looper.Poll(ctx, store)
 	if err != nil {
 		if err != ErrFailedRequest {
 			r.logger.Error().Err(err).Msg("poll error")
