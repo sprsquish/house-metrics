@@ -2,31 +2,31 @@ package housemetrics
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 	"time"
 
-	"github.com/rs/zerolog"
 	"github.com/spf13/pflag"
 	"github.com/sprsquish/housemetrics/pkg/store"
 )
 
-type HandlerFactory = func(string, *pflag.FlagSet, *zerolog.Logger, store.Client) http.Handler
-type LooperFactory = func(string, *pflag.FlagSet, *zerolog.Logger, *HttpClient) Looper
+type HandlerFactory = func(string, *pflag.FlagSet, *slog.Logger, store.Client) http.Handler
+type LooperFactory = func(string, *pflag.FlagSet, *slog.Logger, *HttpClient) Looper
 
 type RunnerFactory struct {
 	Flags  *pflag.FlagSet
 	Client *HttpClient
-	Logger *zerolog.Logger
+	Logger *slog.Logger
 	Store  store.Client
 }
 
 func (f *RunnerFactory) MakeLooper(name string, defaultFreq time.Duration, factory LooperFactory) *LoopRunner {
-	logger := f.Logger.With().Str("looper", name).Logger()
-	looper := factory(name, f.Flags, &logger, f.Client)
+	logger := f.Logger.With("looper", name)
+	looper := factory(name, f.Flags, logger, f.Client)
 
 	runner := LoopRunner{
 		name:   name,
-		logger: &logger,
+		logger: logger,
 		looper: looper,
 	}
 
@@ -37,6 +37,6 @@ func (f *RunnerFactory) MakeLooper(name string, defaultFreq time.Duration, facto
 }
 
 func (f *RunnerFactory) MakeHandler(name string, factory HandlerFactory) http.Handler {
-	logger := f.Logger.With().Str("looper", name).Logger()
-	return factory(name, f.Flags, &logger, f.Store)
+	logger := f.Logger.With("looper", name)
+	return factory(name, f.Flags, logger, f.Store)
 }

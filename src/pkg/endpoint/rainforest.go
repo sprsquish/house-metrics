@@ -4,21 +4,21 @@ import (
 	"bytes"
 	"encoding/xml"
 	"io"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"time"
 
-	"github.com/rs/zerolog"
 	"github.com/spf13/pflag"
 	"github.com/sprsquish/housemetrics/pkg/store"
 )
 
 type Rainforest struct {
-	logger *zerolog.Logger
+	logger *slog.Logger
 	store  store.Client
 }
 
-func NewRainforest(name string, flags *pflag.FlagSet, logger *zerolog.Logger, store store.Client) http.Handler {
+func NewRainforest(name string, flags *pflag.FlagSet, logger *slog.Logger, store store.Client) http.Handler {
 	return &Rainforest{
 		logger: logger,
 		store:  store,
@@ -37,7 +37,7 @@ func (r *Rainforest) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 	err := xml.NewDecoder(bytes.NewReader(bodyBytes)).Decode(&reading)
 	if err != nil {
-		r.logger.Error().Err(err).Bytes("reading", bodyBytes).Msg("reading decode error")
+		r.logger.Error("reading decode error", "err", err, "reading", bodyBytes)
 		return
 	}
 

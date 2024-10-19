@@ -5,21 +5,21 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"time"
 
-	"github.com/rs/zerolog"
 	"github.com/spf13/pflag"
 	"github.com/sprsquish/housemetrics/pkg/store"
 )
 
 type Rachio struct {
-	logger     *zerolog.Logger
+	logger     *slog.Logger
 	store      store.Client
 	externalID string
 }
 
-func NewRachio(name string, flags *pflag.FlagSet, logger *zerolog.Logger, store store.Client) http.Handler {
+func NewRachio(name string, flags *pflag.FlagSet, logger *slog.Logger, store store.Client) http.Handler {
 	r := &Rachio{
 		logger: logger,
 		store:  store,
@@ -49,7 +49,7 @@ func (r *Rachio) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	err := json.NewDecoder(bytes.NewReader(bodyBytes)).Decode(&event)
 	if err != nil {
 		if err != io.EOF {
-			r.logger.Error().Err(err).Bytes("event", bodyBytes).Msg("event decode error")
+			r.logger.Error("event decode error", "err", err, "event", bodyBytes)
 		}
 		return
 	}
@@ -67,7 +67,7 @@ func (r *Rachio) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		status = 0
 	default:
 		status = -1
-		r.logger.Error().Bytes("event", bodyBytes).Msg("invalid event")
+		r.logger.Error("invalid event", "event", bodyBytes)
 	}
 
 	tags := map[string]string{"name": event.ZoneName}

@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/url"
 	"time"
 
-	"github.com/rs/zerolog"
 	"github.com/spf13/pflag"
 	hm "github.com/sprsquish/housemetrics/pkg"
 	"github.com/sprsquish/housemetrics/pkg/store"
@@ -17,7 +17,7 @@ const pTimeFormat = "2006/01/02T15:04:05z"
 
 type PurpleAir struct {
 	client *hm.HttpClient
-	logger *zerolog.Logger
+	logger *slog.Logger
 
 	host string
 
@@ -43,7 +43,7 @@ var metricNames = []string{
 	"pressure",
 }
 
-func NewPurpleAir(name string, flags *pflag.FlagSet, logger *zerolog.Logger, client *hm.HttpClient) hm.Looper {
+func NewPurpleAir(name string, flags *pflag.FlagSet, logger *slog.Logger, client *hm.HttpClient) hm.Looper {
 	p := PurpleAir{
 		client: client,
 		logger: logger,
@@ -58,7 +58,7 @@ func (p *PurpleAir) Init() {
 	urlStr := fmt.Sprintf("http://%s/json", p.host)
 	url, err := url.Parse(urlStr)
 	if err != nil {
-		p.logger.Error().Err(err).Msg("failed to start")
+		p.logger.Error("failed to start", "err", err)
 		return
 	}
 

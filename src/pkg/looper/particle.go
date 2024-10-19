@@ -4,12 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/rs/zerolog"
 	"github.com/spf13/pflag"
 	hm "github.com/sprsquish/housemetrics/pkg"
 	"github.com/sprsquish/housemetrics/pkg/store"
@@ -21,14 +21,14 @@ var eventTypes = map[string]struct{}{
 
 type Particle struct {
 	client *hm.HttpClient
-	logger *zerolog.Logger
+	logger *slog.Logger
 
 	stream    string
 	auth      string
 	streamURL *url.URL
 }
 
-func NewParticle(name string, flags *pflag.FlagSet, logger *zerolog.Logger, client *hm.HttpClient) hm.Looper {
+func NewParticle(name string, flags *pflag.FlagSet, logger *slog.Logger, client *hm.HttpClient) hm.Looper {
 	p := Particle{
 		client: client,
 		logger: logger,
@@ -43,7 +43,7 @@ func NewParticle(name string, flags *pflag.FlagSet, logger *zerolog.Logger, clie
 func (p *Particle) Init() {
 	streamURL, err := url.Parse(fmt.Sprintf("%s?access_token=%s", p.stream, p.auth))
 	if err != nil {
-		p.logger.Error().Err(err).Msg("couldn't parse URL")
+		p.logger.Error("couldn't parse URL", "err", err)
 		return
 	}
 	p.streamURL = streamURL
@@ -57,11 +57,11 @@ func (p *Particle) Poll(ctx context.Context, store store.Client) error {
 
 	for {
 		evt := <-eventChan
-		p.logger.Debug().Interface("event", evt).Msg("event received")
+		p.logger.Debug("event received", "event", evt)
 
 		// channel closed
 		if evt == nil {
-			p.logger.Info().Msg("event channel closed")
+			p.logger.Info("event channel closed")
 			return nil
 		}
 
@@ -75,19 +75,19 @@ func (p *Particle) Poll(ctx context.Context, store store.Client) error {
 			PublishedAt string `json:"published_at"`
 		}
 		if err := json.NewDecoder(strings.NewReader(evt.Data)).Decode(&data); err != nil {
-			p.logger.Error().Err(err).Interface("event", evt).Msg("couldn't parse event data")
+			p.logger.Error("couldn't parse event data", "err", err, "event", evt)
 		}
 
 		tags := map[string]string{"coreid": data.CoreID}
 		val, err := strconv.ParseFloat(data.Value, 32)
 		if err != nil {
-			p.logger.Error().Err(err).Interface("data", data).Msg("could not convert data value")
+			p.logger.Error("could not convert data value", "err", err, "data", data)
 			continue
 		}
 
 		ts, err := time.Parse("2006-01-02T15:04:05.999Z", data.PublishedAt)
 		if err != nil {
-			p.logger.Error().Err(err).Interface("data", data).Msg("could not parse published_at")
+			p.logger.Error("could not parse published_at", "err", err, "data", data)
 		}
 
 		store.Write(ctx, ts, fmt.Sprintf("particle.%s", evt.Type), val, tags)

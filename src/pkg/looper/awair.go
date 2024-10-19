@@ -3,12 +3,12 @@ package looper
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
 
-	"github.com/rs/zerolog"
 	"github.com/spf13/pflag"
 	hm "github.com/sprsquish/housemetrics/pkg"
 	housemetrics "github.com/sprsquish/housemetrics/pkg"
@@ -17,7 +17,7 @@ import (
 
 type Awair struct {
 	client *hm.HttpClient
-	logger *zerolog.Logger
+	logger *slog.Logger
 
 	token   string
 	devices []string
@@ -35,7 +35,7 @@ type AwairReading struct {
 	}
 }
 
-func NewAwair(name string, flags *pflag.FlagSet, logger *zerolog.Logger, client *hm.HttpClient) hm.Looper {
+func NewAwair(name string, flags *pflag.FlagSet, logger *slog.Logger, client *hm.HttpClient) hm.Looper {
 	a := Awair{
 		client:  client,
 		logger:  logger,
@@ -52,7 +52,7 @@ func (a *Awair) Init() {
 	for _, device := range a.devices {
 		dev := strings.Split(device, ":")
 		if len(dev) != 3 {
-			a.logger.Error().Str("device", device).Msg("bad device")
+			a.logger.Error("bad device", "device", device)
 			continue
 		}
 
@@ -60,7 +60,7 @@ func (a *Awair) Init() {
 
 		urlStr := fmt.Sprintf("https://developer-apis.awair.is/v1/users/self/devices/%s/%s/air-data/latest", devType, devID)
 		if url, err := url.Parse(urlStr); err != nil {
-			a.logger.Error().Err(err).Str("device", devName).Msg("couldn't parse URL")
+			a.logger.Error("couldn't parse URL", "err", err, "device", devName)
 		} else {
 			a.devURLs[devName] = url
 		}
@@ -68,7 +68,7 @@ func (a *Awair) Init() {
 }
 
 func (a *Awair) Poll(ctx context.Context, store store.Client) error {
-	a.logger.Debug().Msg("polling devices")
+	a.logger.Debug("polling devices")
 
 	for devName, devURL := range a.devURLs {
 		var reading AwairReading
@@ -83,7 +83,7 @@ func (a *Awair) Poll(ctx context.Context, store store.Client) error {
 		for _, entry := range reading.Data {
 			ts, err := time.Parse("2006-01-02T15:04:05.999Z", entry.Timestamp)
 			if err != nil {
-				a.logger.Error().Err(err).Interface("reading", reading).Msg("could not parse timestamp")
+				a.logger.Error("could not parse timestamp", "err", err, "reading", reading)
 			}
 
 			for _, sensor := range entry.Sensors {

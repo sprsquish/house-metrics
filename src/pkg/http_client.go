@@ -7,11 +7,10 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
-
-	"github.com/rs/zerolog"
 )
 
 var ErrFailedRequest = errors.New("failed request")
@@ -37,12 +36,12 @@ func URLOpt(u *url.URL) func(req *http.Request) {
 	}
 }
 
-func (c *HttpClient) SendJSON(ctx context.Context, log *zerolog.Logger, reqData any, repData any, opts func(*http.Request)) error {
+func (c *HttpClient) SendJSON(ctx context.Context, log *slog.Logger, reqData any, repData any, opts func(*http.Request)) error {
 	reqBytes, err := json.Marshal(reqData)
 	if err != nil {
 		return err
 	}
-	log.Debug().Str("body", string(reqBytes)).Msg("SendJSON req body")
+	log.Debug("SendJSON req body", "body", string(reqBytes))
 
 	reqBody := bytes.NewReader(reqBytes)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "", reqBody)
@@ -63,16 +62,16 @@ func (c *HttpClient) SendJSON(ctx context.Context, log *zerolog.Logger, reqData 
 	}
 
 	bodyBytes, _ := io.ReadAll(rep.Body)
-	log.Debug().Str("body", string(bodyBytes)).Msg("SendJSON recv body")
+	log.Debug("SendJSON recv body", "body", string(bodyBytes))
 
 	if err := json.NewDecoder(bytes.NewReader(bodyBytes)).Decode(repData); err != nil {
-		log.Error().Err(err).Str("body", string(bodyBytes)).Msg("SendJSON decode error")
+		log.Error("SendJSON decode error", "err", err, "body", string(bodyBytes))
 		return err
 	}
 	return nil
 }
 
-func (c *HttpClient) GetJSON(ctx context.Context, log *zerolog.Logger, data any, opts func(*http.Request)) error {
+func (c *HttpClient) GetJSON(ctx context.Context, log *slog.Logger, data any, opts func(*http.Request)) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "", nil)
 	if err != nil {
 		return err
@@ -88,21 +87,21 @@ func (c *HttpClient) GetJSON(ctx context.Context, log *zerolog.Logger, data any,
 
 	if rep.StatusCode < 200 || rep.StatusCode >= 300 {
 		bodyBytes, _ := io.ReadAll(rep.Body)
-		log.Error().Int("code", rep.StatusCode).Str("rep", string(bodyBytes)).Msg("request error")
+		log.Error("request error", "code", rep.StatusCode, "rep", bodyBytes)
 		return ErrFailedRequest
 	}
 
 	bodyBytes, _ := io.ReadAll(rep.Body)
-	log.Debug().Str("body", string(bodyBytes)).Msg("GetJSON body")
+	log.Debug("GetJSON body", "body", string(bodyBytes))
 
 	if err := json.NewDecoder(bytes.NewReader(bodyBytes)).Decode(data); err != nil {
-		log.Error().Err(err).Str("body", string(bodyBytes)).Msg("GetJSON decode error")
+		log.Error("GetJSON decode error", "err", err, "body", string(bodyBytes))
 		return err
 	}
 	return nil
 }
 
-func (c *HttpClient) Events(ctx context.Context, log *zerolog.Logger, opts func(*http.Request)) (chan *Event, error) {
+func (c *HttpClient) Events(ctx context.Context, log *slog.Logger, opts func(*http.Request)) (chan *Event, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "", nil)
 	if err != nil {
 		return nil, err
@@ -122,7 +121,7 @@ func (c *HttpClient) Events(ctx context.Context, log *zerolog.Logger, opts func(
 		select {
 		case <-ctx.Done():
 		case err := <-errChan:
-			log.Error().Err(err).Msg("event stream read error")
+			log.Error("event stream read error", "err", err)
 		}
 
 		rep.Body.Close()
@@ -140,7 +139,7 @@ func (c *HttpClient) Events(ctx context.Context, log *zerolog.Logger, opts func(
 				continue
 			}
 
-			log.Debug().Str("line", line).Msg("Event line")
+			log.Debug("Event line", "line", line)
 
 			if err != nil {
 				errChan <- err

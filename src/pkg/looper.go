@@ -2,9 +2,9 @@ package housemetrics
 
 import (
 	"context"
+	"log/slog"
 	"time"
 
-	"github.com/rs/zerolog"
 	"github.com/sprsquish/housemetrics/pkg/store"
 )
 
@@ -16,7 +16,7 @@ type Looper interface {
 type LoopRunner struct {
 	name   string
 	looper Looper
-	logger *zerolog.Logger
+	logger *slog.Logger
 
 	pollFreq time.Duration
 	enabled  bool
@@ -24,13 +24,13 @@ type LoopRunner struct {
 
 func (r *LoopRunner) Run(ctx context.Context, store store.Client) {
 	if !r.enabled {
-		r.logger.Info().Msg("disabled")
+		r.logger.Info("disabled")
 		return
 	}
 
 	r.looper.Init()
 
-	r.logger.Info().Dur("freq", r.pollFreq).Msg("starting")
+	r.logger.Info("starting", "freq", r.pollFreq)
 	ticker := time.NewTicker(r.pollFreq)
 
 	r.poll(ctx, store)
@@ -39,7 +39,7 @@ func (r *LoopRunner) Run(ctx context.Context, store store.Client) {
 		select {
 		case <-ctx.Done():
 			ticker.Stop()
-			r.logger.Info().Msg("stopping")
+			r.logger.Info("stopping")
 			return
 
 		case <-ticker.C:
@@ -52,9 +52,9 @@ func (r *LoopRunner) poll(ctx context.Context, store store.Client) {
 	err := r.looper.Poll(ctx, store)
 	if err != nil {
 		if err != ErrFailedRequest {
-			r.logger.Error().Err(err).Msg("poll error")
+			r.logger.Error("poll error", "err", err)
 		} else {
-			r.logger.Info().Msg("failed request.. sleeping")
+			r.logger.Info("failed request.. sleeping")
 			time.Sleep(1 * time.Minute)
 		}
 	}

@@ -3,11 +3,11 @@ package looper
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"time"
 
-	"github.com/rs/zerolog"
 	"github.com/spf13/pflag"
 	hm "github.com/sprsquish/housemetrics/pkg"
 	"github.com/sprsquish/housemetrics/pkg/store"
@@ -22,7 +22,7 @@ var (
 
 type Flume struct {
 	client *hm.HttpClient
-	logger *zerolog.Logger
+	logger *slog.Logger
 
 	clientID     string
 	clientSecret string
@@ -36,7 +36,7 @@ type Flume struct {
 	sinceTS   time.Time
 }
 
-func NewFlume(name string, flags *pflag.FlagSet, logger *zerolog.Logger, client *hm.HttpClient) hm.Looper {
+func NewFlume(name string, flags *pflag.FlagSet, logger *slog.Logger, client *hm.HttpClient) hm.Looper {
 	f := Flume{
 		client: client,
 		logger: logger,
@@ -104,7 +104,7 @@ func (f *Flume) Poll(ctx context.Context, store store.Client) error {
 			if entry.Datetime != "" {
 				ts, err = time.Parse(timeFormat, entry.Datetime)
 				if err != nil {
-					f.logger.Error().Err(err).Interface("entry", entry).Msg("could not parse timestamp")
+					f.logger.Error("could not parse timestamp", "err", err, "entry", entry)
 				}
 			}
 			store.Write(ctx, ts, "flume.usage", entry.Value, tags)

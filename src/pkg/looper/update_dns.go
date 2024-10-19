@@ -3,6 +3,7 @@ package looper
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net"
 	"net/url"
 	"strings"
@@ -11,7 +12,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/route53"
 	r53types "github.com/aws/aws-sdk-go-v2/service/route53/types"
-	"github.com/rs/zerolog"
 	"github.com/spf13/pflag"
 	hm "github.com/sprsquish/housemetrics/pkg"
 	"github.com/sprsquish/housemetrics/pkg/store"
@@ -21,7 +21,7 @@ var ipifyURL, _ = url.Parse("https://api.ipify.org?format=json")
 
 type UpdateDNS struct {
 	client *hm.HttpClient
-	logger *zerolog.Logger
+	logger *slog.Logger
 
 	r53Key      string
 	r53Secret   string
@@ -32,7 +32,7 @@ type UpdateDNS struct {
 	r53Client   *route53.Client
 }
 
-func NewUpdateDNS(name string, flags *pflag.FlagSet, logger *zerolog.Logger, client *hm.HttpClient) hm.Looper {
+func NewUpdateDNS(name string, flags *pflag.FlagSet, logger *slog.Logger, client *hm.HttpClient) hm.Looper {
 	u := UpdateDNS{
 		client: client,
 		logger: logger,
@@ -77,16 +77,16 @@ func (u *UpdateDNS) Poll(ctx context.Context, store store.Client) error {
 			resIPs, err := net.DefaultResolver.LookupIP(ctx, "ip4", d)
 
 			if err != nil || len(resIPs) != 1 {
-				u.logger.Error().Err(err).Str("domain", d).Msg("resolver error")
+				u.logger.Error("resolver error", "err", err, "domain", d)
 			}
 
 			if curIP.Equal(resIPs[0]) {
-				u.logger.Debug().Str("domain", d).Msg("ip is current")
+				u.logger.Debug("ip is current", "domain", d)
 				return
 			}
 
 			if err := u.updateEntry(ctx, resIPs[0], curIP, d, z); err != nil {
-				u.logger.Error().Err(err).Str("domain", d).Msg("dns update error")
+				u.logger.Error("dns update error", "err", err, "domain", d)
 			}
 		}(domain, zone)
 	}

@@ -2,9 +2,8 @@ package store
 
 import (
 	"context"
+	"log/slog"
 	"time"
-
-	"github.com/rs/zerolog"
 )
 
 type Client interface {
@@ -13,20 +12,19 @@ type Client interface {
 }
 
 type LogClient struct {
-	logger *zerolog.Logger
+	logger *slog.Logger
 }
 
-func NewLogStore(log *zerolog.Logger) *LogClient {
-	storeLog := log.With().Str("store", "log").Logger()
-	return &LogClient{&storeLog}
+func NewLogStore(log *slog.Logger) *LogClient {
+	return &LogClient{log.With("store", "log")}
 }
 
 func (s *LogClient) Init() {}
 func (s *LogClient) Write(ctx context.Context, ts time.Time, name string, val any, tags map[string]string) {
-	s.logger.Info().
-		Time("ts", ts).
-		Str("name", name).
-		Interface("val", val).
-		Interface("tags", tags).
-		Msg("store")
+	s.logger.Info(
+		"store",
+		"ts", ts,
+		"name", name,
+		"val", val,
+		"tags", tags)
 }

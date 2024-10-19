@@ -3,11 +3,11 @@ package looper
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/url"
 	"strings"
 	"time"
 
-	"github.com/rs/zerolog"
 	"github.com/spf13/pflag"
 	hm "github.com/sprsquish/housemetrics/pkg"
 	"github.com/sprsquish/housemetrics/pkg/store"
@@ -15,7 +15,7 @@ import (
 
 type AmbientWeather struct {
 	client *hm.HttpClient
-	logger *zerolog.Logger
+	logger *slog.Logger
 
 	mac    string
 	apiKey string
@@ -42,7 +42,7 @@ type weatherReading struct {
 	RainEvent   float64 `json:"eventrainin"`
 }
 
-func NewAmbientWeather(name string, flags *pflag.FlagSet, logger *zerolog.Logger, client *hm.HttpClient) hm.Looper {
+func NewAmbientWeather(name string, flags *pflag.FlagSet, logger *slog.Logger, client *hm.HttpClient) hm.Looper {
 	a := AmbientWeather{
 		client: client,
 		logger: logger,
@@ -59,7 +59,7 @@ func (a *AmbientWeather) Init() {
 	urlStr := fmt.Sprintf("https://rt.ambientweather.net/v1/devices")
 	url, err := url.Parse(urlStr)
 	if err != nil {
-		a.logger.Error().Err(err).Msg("failed to start")
+		a.logger.Error("failed to start", "err", err)
 		return
 	}
 
