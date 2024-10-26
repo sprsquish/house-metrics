@@ -77,7 +77,7 @@ func (u *UpdateDNS) Poll(ctx context.Context, store store.Client) error {
 			resIPs, err := net.DefaultResolver.LookupIP(ctx, "ip4", d)
 
 			if err != nil || len(resIPs) != 1 {
-				u.logger.Error("resolver error", "err", err, "domain", d)
+				u.logger.Error("resolver error", "err", err, "domain", d, "ips", resIPs)
 			}
 
 			if curIP.Equal(resIPs[0]) {
