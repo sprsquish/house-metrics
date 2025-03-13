@@ -1,7 +1,6 @@
 module github.com/sprsquish/housemetrics
 
 go 1.23
-
 require (
 	github.com/aws/aws-sdk-go-v2 v1.31.0
 	github.com/aws/aws-sdk-go-v2/service/route53 v1.44.4
@@ -21,7 +20,7 @@ require (
 	github.com/influxdata/line-protocol v0.0.0-20210922203350-b1ad95c89adf // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/oapi-codegen/runtime v1.1.1 // indirect
-	golang.org/x/net v0.29.0 // indirect
-	golang.org/x/sys v0.26.0 // indirect
+	golang.org/x/net v0.36.0 // indirect
+	golang.org/x/sys v0.30.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
