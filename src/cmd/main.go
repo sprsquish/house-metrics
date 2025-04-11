@@ -28,10 +28,11 @@ func (l *logLeveler) Level() slog.Level {
 }
 
 var leveler = &logLeveler{}
-var log = slog.New(slogor.NewHandler(os.Stdout, slogor.Options{
-	Level:      leveler,
-	TimeFormat: time.RFC3339,
-}))
+var log = slog.New(slogor.NewHandler(
+	os.Stdout,
+	slogor.SetLevel(leveler),
+	slogor.SetTimeFormat(time.RFC3339),
+))
 
 var storage store.Client
 
