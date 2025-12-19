@@ -21,7 +21,7 @@ var (
 )
 
 type Flume struct {
-	client *hm.HttpClient
+	client *hm.HTTPClient
 	logger *slog.Logger
 
 	clientID     string
@@ -36,7 +36,7 @@ type Flume struct {
 	sinceTS   time.Time
 }
 
-func NewFlume(name string, flags *pflag.FlagSet, logger *slog.Logger, client *hm.HttpClient) hm.Looper {
+func NewFlume(name string, flags *pflag.FlagSet, logger *slog.Logger, client *hm.HTTPClient) hm.Looper {
 	f := Flume{
 		client: client,
 		logger: logger,

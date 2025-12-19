@@ -54,7 +54,7 @@ func init() {
 
 	f := &hm.RunnerFactory{
 		Flags:  flags,
-		Client: hm.NewHttpClient(),
+		Client: hm.NewHTTPClient(),
 		Logger: log,
 		Store:  storage,
 	}
@@ -78,7 +78,7 @@ func main() {
 	}
 }
 
-func run(cmd *cobra.Command, args []string) {
+func run(_ *cobra.Command, _ []string) {
 	stopChan := make(chan os.Signal, 1)
 	signal.Notify(stopChan, syscall.SIGTERM, syscall.SIGINT)
 
@@ -100,16 +100,14 @@ func run(cmd *cobra.Command, args []string) {
 		Handler: muxer,
 	}
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		log.Info("starting listener", "addr", httpAddr)
 		if err := server.ListenAndServe(); err != nil {
 			if err != http.ErrServerClosed {
 				log.Error("failed to start listener", "err", err)
 			}
 		}
-	}()
+	})
 
 	<-stopChan
 

@@ -14,7 +14,7 @@ import (
 )
 
 type AmbientWeather struct {
-	client *hm.HttpClient
+	client *hm.HTTPClient
 	logger *slog.Logger
 
 	mac    string
@@ -42,7 +42,7 @@ type weatherReading struct {
 	RainEvent   float64 `json:"eventrainin"`
 }
 
-func NewAmbientWeather(name string, flags *pflag.FlagSet, logger *slog.Logger, client *hm.HttpClient) hm.Looper {
+func NewAmbientWeather(name string, flags *pflag.FlagSet, logger *slog.Logger, client *hm.HTTPClient) hm.Looper {
 	a := AmbientWeather{
 		client: client,
 		logger: logger,
@@ -56,7 +56,7 @@ func NewAmbientWeather(name string, flags *pflag.FlagSet, logger *slog.Logger, c
 }
 
 func (a *AmbientWeather) Init() {
-	urlStr := fmt.Sprintf("https://rt.ambientweather.net/v1/devices")
+	urlStr := "https://rt.ambientweather.net/v1/devices"
 	url, err := url.Parse(urlStr)
 	if err != nil {
 		a.logger.Error("failed to start", "err", err)

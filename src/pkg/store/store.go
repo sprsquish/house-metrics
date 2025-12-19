@@ -20,7 +20,7 @@ func NewLogStore(log *slog.Logger) *LogClient {
 }
 
 func (s *LogClient) Init() {}
-func (s *LogClient) Write(ctx context.Context, ts time.Time, name string, val any, tags map[string]string) {
+func (s *LogClient) Write(_ context.Context, ts time.Time, name string, val any, tags map[string]string) {
 	s.logger.Info(
 		"store",
 		"ts", ts,

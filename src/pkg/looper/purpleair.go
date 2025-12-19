@@ -16,7 +16,7 @@ import (
 const pTimeFormat = "2006/01/02T15:04:05z"
 
 type PurpleAir struct {
-	client *hm.HttpClient
+	client *hm.HTTPClient
 	logger *slog.Logger
 
 	host string
@@ -43,7 +43,7 @@ var metricNames = []string{
 	"pressure",
 }
 
-func NewPurpleAir(name string, flags *pflag.FlagSet, logger *slog.Logger, client *hm.HttpClient) hm.Looper {
+func NewPurpleAir(name string, flags *pflag.FlagSet, logger *slog.Logger, client *hm.HTTPClient) hm.Looper {
 	p := PurpleAir{
 		client: client,
 		logger: logger,
@@ -73,12 +73,12 @@ func (p *PurpleAir) Poll(ctx context.Context, store store.Client) error {
 
 	tsAny, found := reading["DateTime"]
 	if !found {
-		return errors.New("Did not find DateTime in reading")
+		return errors.New("failed to find DateTime in reading")
 	}
 
 	tsStr, ok := tsAny.(string)
 	if !ok {
-		return fmt.Errorf("DateTime was not a string: %#v", tsAny)
+		return fmt.Errorf("failed to cast DateTime to string: %#v", tsAny)
 	}
 
 	ts, err := time.Parse(pTimeFormat, tsStr)

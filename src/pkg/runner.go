@@ -11,11 +11,11 @@ import (
 )
 
 type HandlerFactory = func(string, *pflag.FlagSet, *slog.Logger, store.Client) http.Handler
-type LooperFactory = func(string, *pflag.FlagSet, *slog.Logger, *HttpClient) Looper
+type LooperFactory = func(string, *pflag.FlagSet, *slog.Logger, *HTTPClient) Looper
 
 type RunnerFactory struct {
 	Flags  *pflag.FlagSet
-	Client *HttpClient
+	Client *HTTPClient
 	Logger *slog.Logger
 	Store  store.Client
 }

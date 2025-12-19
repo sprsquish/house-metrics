@@ -20,7 +20,7 @@ import (
 var ipifyURL, _ = url.Parse("https://api.ipify.org?format=json")
 
 type UpdateDNS struct {
-	client *hm.HttpClient
+	client *hm.HTTPClient
 	logger *slog.Logger
 
 	r53Key      string
@@ -32,7 +32,7 @@ type UpdateDNS struct {
 	r53Client   *route53.Client
 }
 
-func NewUpdateDNS(name string, flags *pflag.FlagSet, logger *slog.Logger, client *hm.HttpClient) hm.Looper {
+func NewUpdateDNS(name string, flags *pflag.FlagSet, logger *slog.Logger, client *hm.HTTPClient) hm.Looper {
 	u := UpdateDNS{
 		client: client,
 		logger: logger,
@@ -63,7 +63,7 @@ func (u *UpdateDNS) Init() {
 	})
 }
 
-func (u *UpdateDNS) Poll(ctx context.Context, store store.Client) error {
+func (u *UpdateDNS) Poll(ctx context.Context, _ store.Client) error {
 	curIP, err := u.currentIP(ctx)
 	if err != nil {
 		return err
@@ -96,7 +96,7 @@ func (u *UpdateDNS) Poll(ctx context.Context, store store.Client) error {
 }
 
 // Implement aws.CredentialsProvider interface
-func (u *UpdateDNS) Retrieve(ctx context.Context) (aws.Credentials, error) {
+func (u *UpdateDNS) Retrieve(_ context.Context) (aws.Credentials, error) {
 	return u.credentials, nil
 }
 
@@ -128,6 +128,6 @@ func (u *UpdateDNS) updateEntry(ctx context.Context, oldIP, newIP net.IP, domain
 		},
 		HostedZoneId: aws.String(zone),
 	}
-	u.r53Client.ChangeResourceRecordSets(ctx, &changes)
-	return nil
+	_, err := u.r53Client.ChangeResourceRecordSets(ctx, &changes)
+	return err
 }

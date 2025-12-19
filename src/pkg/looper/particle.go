@@ -20,7 +20,7 @@ var eventTypes = map[string]struct{}{
 }
 
 type Particle struct {
-	client *hm.HttpClient
+	client *hm.HTTPClient
 	logger *slog.Logger
 
 	stream    string
@@ -28,7 +28,7 @@ type Particle struct {
 	streamURL *url.URL
 }
 
-func NewParticle(name string, flags *pflag.FlagSet, logger *slog.Logger, client *hm.HttpClient) hm.Looper {
+func NewParticle(name string, flags *pflag.FlagSet, logger *slog.Logger, client *hm.HTTPClient) hm.Looper {
 	p := Particle{
 		client: client,
 		logger: logger,

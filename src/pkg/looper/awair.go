@@ -11,12 +11,11 @@ import (
 
 	"github.com/spf13/pflag"
 	hm "github.com/sprsquish/housemetrics/pkg"
-	housemetrics "github.com/sprsquish/housemetrics/pkg"
 	"github.com/sprsquish/housemetrics/pkg/store"
 )
 
 type Awair struct {
-	client *hm.HttpClient
+	client *hm.HTTPClient
 	logger *slog.Logger
 
 	token   string
@@ -35,7 +34,7 @@ type AwairReading struct {
 	}
 }
 
-func NewAwair(name string, flags *pflag.FlagSet, logger *slog.Logger, client *hm.HttpClient) hm.Looper {
+func NewAwair(name string, flags *pflag.FlagSet, logger *slog.Logger, client *hm.HTTPClient) hm.Looper {
 	a := Awair{
 		client:  client,
 		logger:  logger,
@@ -89,7 +88,7 @@ func (a *Awair) Poll(ctx context.Context, store store.Client) error {
 			for _, sensor := range entry.Sensors {
 				store.Write(ctx, ts, fmt.Sprintf("awair.%s", sensor.Comp), sensor.Value, devTags)
 				if pm25, ok := sensor.Value.(float64); ok && sensor.Comp == "pm25" {
-					store.Write(ctx, ts, "awair.pm25_aqi", housemetrics.PM25ToAQI(pm25), devTags)
+					store.Write(ctx, ts, "awair.pm25_aqi", hm.PM25ToAQI(pm25), devTags)
 				}
 			}
 		}

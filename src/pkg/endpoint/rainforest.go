@@ -18,7 +18,7 @@ type Rainforest struct {
 	store  store.Client
 }
 
-func NewRainforest(name string, flags *pflag.FlagSet, logger *slog.Logger, store store.Client) http.Handler {
+func NewRainforest(_ string, _ *pflag.FlagSet, logger *slog.Logger, store store.Client) http.Handler {
 	return &Rainforest{
 		logger: logger,
 		store:  store,

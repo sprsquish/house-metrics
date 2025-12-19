@@ -15,7 +15,7 @@ import (
 
 var ErrFailedRequest = errors.New("failed request")
 
-type HttpClient struct {
+type HTTPClient struct {
 	client *http.Client
 }
 
@@ -24,8 +24,8 @@ type Event struct {
 	Data string
 }
 
-func NewHttpClient() *HttpClient {
-	return &HttpClient{
+func NewHTTPClient() *HTTPClient {
+	return &HTTPClient{
 		client: &http.Client{},
 	}
 }
@@ -36,7 +36,7 @@ func URLOpt(u *url.URL) func(req *http.Request) {
 	}
 }
 
-func (c *HttpClient) SendJSON(ctx context.Context, log *slog.Logger, reqData any, repData any, opts func(*http.Request)) error {
+func (c *HTTPClient) SendJSON(ctx context.Context, log *slog.Logger, reqData any, repData any, opts func(*http.Request)) error {
 	reqBytes, err := json.Marshal(reqData)
 	if err != nil {
 		return err
@@ -71,7 +71,7 @@ func (c *HttpClient) SendJSON(ctx context.Context, log *slog.Logger, reqData any
 	return nil
 }
 
-func (c *HttpClient) GetJSON(ctx context.Context, log *slog.Logger, data any, opts func(*http.Request)) error {
+func (c *HTTPClient) GetJSON(ctx context.Context, log *slog.Logger, data any, opts func(*http.Request)) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "", nil)
 	if err != nil {
 		return err
@@ -101,7 +101,7 @@ func (c *HttpClient) GetJSON(ctx context.Context, log *slog.Logger, data any, op
 	return nil
 }
 
-func (c *HttpClient) Events(ctx context.Context, log *slog.Logger, opts func(*http.Request)) (chan *Event, error) {
+func (c *HTTPClient) Events(ctx context.Context, log *slog.Logger, opts func(*http.Request)) (chan *Event, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "", nil)
 	if err != nil {
 		return nil, err
